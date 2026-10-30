@@ -1,0 +1,17 @@
+name: "japan_address_code"
+version: "1.0.0"
+
+profile: "japan_address_code"
+
+model-paths: ["models"]
+macro-paths: ["macros", "shared/macros"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  japan_address_code:
+    +database: japan_address_code
+    main:
+      +materialized: table

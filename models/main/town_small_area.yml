@@ -1,0 +1,34 @@
+version: 2
+models:
+- name: town_small_area
+  description: 'アドレス・ベース・レジストリの町字と、国勢調査の小地域（令和2年）の対応。1 行が町字と小地域の 1 組。
+
+    同じ市区町村の中で名前が一致する小地域に当て、当たらない町字は代表点が入る小地域に当てた。
+
+    「アドレス・ベース・レジストリ」（デジタル庁）（https://dataset.address-br.digital.go.jp/）と
+
+    「国勢調査 町丁・字等別境界データ」（総務省統計局）（https://www.e-stat.go.jp/gis）を加工して作成。
+
+    '
+  access: public
+  columns:
+  - name: lg_code
+    data_type: varchar
+  - name: machiaza_id
+    data_type: varchar
+  - name: key_code
+    data_type: varchar
+  - name: match_type
+    data_type: varchar
+  - name: town_share
+    data_type: double
+  - name: small_area_share
+    data_type: double
+  - name: method
+    data_type: varchar
+  - name: point_mismatch
+    data_type: boolean
+  - name: small_area_year
+    data_type: integer
+  - name: valid_from
+    data_type: date
