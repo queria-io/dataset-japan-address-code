@@ -1,0 +1,33 @@
+schema: main
+name: small_area_mesh
+title: 小地域と 3 次メッシュの対応
+description: |
+  国勢調査の小地域（令和2年）と 3 次メッシュ（標準地域メッシュ、約 1km 四方）の重なり。1 行が小地域とメッシュの 1 組。
+  重なりの面積と、小地域・メッシュそれぞれに占める割合を持つので、小地域の集計値をメッシュへ、メッシュの集計値を小地域へ面積で按分できる。
+  「国勢調査 町丁・字等別境界データ」（総務省統計局）（https://www.e-stat.go.jp/gis）を加工して作成。
+keywords:
+  - 小地域
+  - メッシュ
+  - 対応表
+  - 按分
+published: true
+sources:
+  - path: https://www.e-stat.go.jp/gis
+fields:
+  - name: key_code
+    title: 小地域コード
+    description: "国勢調査の KEY_CODE（9桁または11桁）"
+    semantic: { role: entity, name: small_area }
+  - name: mesh_code
+    title: 3 次メッシュコード
+    description: "8桁。標準地域メッシュの 3 次メッシュ（緯度 30 秒 × 経度 45 秒）"
+    semantic: { role: entity, name: mesh }
+  - name: area_m2
+    title: 重なりの面積（平方メートル）
+    description: "経緯度の面積をメッシュの中心の緯度で平方メートルに直した近似値。小地域ごとの合計は e_stat の small_area.area_m2 とほぼ一致する（千代田区で 0.2% 差）"
+  - name: small_area_share
+    title: 小地域のうちこのメッシュに入る割合
+    description: "0〜1。同じ小地域の行を足すと 1"
+  - name: mesh_share
+    title: メッシュのうちこの小地域が占める割合
+    description: "0〜1。海や、e_stat の small_area で除いた 2 つ目以降の形（飛び地など）の分があるので、同じメッシュの行を足しても 1 にならないことがある"
