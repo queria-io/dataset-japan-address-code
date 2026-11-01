@@ -1,0 +1,28 @@
+version: 2
+models:
+- name: town_mesh
+  description: 'アドレス・ベース・レジストリの町字と 3 次メッシュ（標準地域メッシュ、約 1km 四方）の重なり。1 行が町字とメッシュの 1 組。
+
+    町字の形は town_shape。重なりの面積と、町字・メッシュそれぞれに占める割合を持つので、町字の集計値をメッシュへ、メッシュの集計値を町字へ面積で按分できる。
+
+    大字・町の形を借りた小字（town_shape の shape_method が parent_oaza）は入っていない。同じ大字・町（町字 ID の末尾 000）の行を使う。
+
+    「アドレス・ベース・レジストリ」（デジタル庁）（https://dataset.address-br.digital.go.jp/）と
+
+    「国勢調査 町丁・字等別境界データ」（総務省統計局）（https://www.e-stat.go.jp/gis）を加工して作成。
+
+    '
+  access: public
+  columns:
+  - name: lg_code
+    data_type: varchar
+  - name: machiaza_id
+    data_type: varchar
+  - name: mesh_code
+    data_type: varchar
+  - name: area_m2
+    data_type: double
+  - name: town_share
+    data_type: double
+  - name: mesh_share
+    data_type: double

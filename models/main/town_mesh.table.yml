@@ -1,0 +1,40 @@
+schema: main
+name: town_mesh
+title: 町字と 3 次メッシュの対応
+description: |
+  アドレス・ベース・レジストリの町字と 3 次メッシュ（標準地域メッシュ、約 1km 四方）の重なり。1 行が町字とメッシュの 1 組。
+  町字の形は town_shape。重なりの面積と、町字・メッシュそれぞれに占める割合を持つので、町字の集計値をメッシュへ、メッシュの集計値を町字へ面積で按分できる。
+  大字・町の形を借りた小字（town_shape の shape_method が parent_oaza）は入っていない。同じ大字・町（町字 ID の末尾 000）の行を使う。
+  「アドレス・ベース・レジストリ」（デジタル庁）（https://dataset.address-br.digital.go.jp/）と
+  「国勢調査 町丁・字等別境界データ」（総務省統計局）（https://www.e-stat.go.jp/gis）を加工して作成。
+keywords:
+  - 町字
+  - メッシュ
+  - 対応表
+  - 按分
+published: true
+sources:
+  - path: https://dataset.address-br.digital.go.jp/
+  - path: https://www.e-stat.go.jp/gis
+fields:
+  - name: lg_code
+    title: 全国地方公共団体コード
+    description: "6桁（検査数字あり）"
+    semantic: { role: entity, name: city }
+  - name: machiaza_id
+    title: 町字ID
+    description: "7桁。lg_code との組で一意"
+    semantic: { role: entity, name: town }
+  - name: mesh_code
+    title: 3 次メッシュコード
+    description: "8桁。標準地域メッシュの 3 次メッシュ（緯度 30 秒 × 経度 45 秒）"
+    semantic: { role: entity, name: mesh }
+  - name: area_m2
+    title: 重なりの面積（平方メートル）
+    description: "経緯度の面積をメッシュの中心の緯度で平方メートルに直した近似値"
+  - name: town_share
+    title: 町字のうちこのメッシュに入る割合
+    description: "0〜1。同じ町字の行を足すと 1"
+  - name: mesh_share
+    title: メッシュのうちこの町字が占める割合
+    description: "0〜1。町字の形の無い所や海があるので、同じメッシュの行を足しても 1 にならないことがある"
