@@ -3,7 +3,7 @@ name: town_shape
 title: 町字の形
 description: |
   アドレス・ベース・レジストリの町字の形。公式の町字の形は無いので、国勢調査の小地域（令和2年）の形から作った。
-  作り方は shape_method。小地域に町字が複数入る所と、名前で当たらない地番の地域はまだ入っていない。
+  小地域に町字が 1 つならその形、複数なら代表点のボロノイ図で切り分けた形。作り方は shape_method。
   「アドレス・ベース・レジストリ」（デジタル庁）（https://dataset.address-br.digital.go.jp/）と
   「国勢調査 町丁・字等別境界データ」（総務省統計局）（https://www.e-stat.go.jp/gis）を加工して作成。
 keywords:
@@ -24,7 +24,7 @@ fields:
     semantic: { role: entity, name: town }
   - name: geometry
     title: 形
-    description: "e_stat の small_area の形のまま（同じ測地系）"
+    description: "e_stat の small_area と同じ測地系"
   - name: shape_method
     title: 作り方
-    description: "small_area（名前で 1 対 1 に当たる小地域の形）、parent_oaza（小字。同じ大字・町の形）"
+    description: "small_area（当たる小地域の形をそのまま。複数なら合わせた形）、voronoi（少なくとも 1 つの小地域を、町字の代表点か住居表示の街区の代表点のボロノイ図で切り分けた）、parent_oaza（小字。同じ大字・町の形）"
