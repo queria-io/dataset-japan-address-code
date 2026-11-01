@@ -8,7 +8,7 @@ Queria の公開データセット address_br と e_stat を読んで作りま�
 
 | 原典 | 使う表 |
 | --- | --- |
-| [アドレス・ベース・レジストリ](https://dataset.address-br.digital.go.jp/)（デジタル庁） | `address_br.main.mart_town` |
+| [アドレス・ベース・レジストリ](https://dataset.address-br.digital.go.jp/)（デジタル庁） | `address_br.main.mart_town`、`address_br.main.mart_rsdtdsp_blk` |
 | [国勢調査 町丁・字等別境界データ](https://www.e-stat.go.jp/gis)（総務省統計局、令和2年） | `e_stat.boundary.small_area` |
 
 ## 収録テーブル
@@ -22,7 +22,7 @@ Queria の公開データセット address_br と e_stat を読んで作りま�
 - 町字は `lg_code`（6 桁）と `machiaza_id`（7 桁）の組で一意です。`machiaza_id` だけで結合しないでください
 - 名前は同じ市区町村の中で突き合わせます。ABR の「１丁目」と小地域の「一丁目」のような数字の書き方はそろえます
 - 名前で当たらない町字は、町字の代表点が入る小地域に当てます。代表点の無い小字は大字・町の代表点を使います
-- 町字の形は、名前で 1 対 1 に当たる小地域の形と、小字に大字・町の形を当てたものだけです
+- 町字の形は、小地域に町字が 1 つならその小地域の形、複数なら町字の代表点（住居表示の町字は街区の代表点）のボロノイ図で小地域を切り分けた形です。形の無い小字には大字・町の形を当てます
 
 ```sql
 -- 町字ごとの人口（小地域と 1 対 1 の町字だけ）

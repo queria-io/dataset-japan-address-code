@@ -83,27 +83,42 @@ generator AS (
     -- 同じ位置の点が持ち主をまたぐと、切り分けた形が重なる。1 つだけ残す
     QUALIFY row_number() OVER (PARTITION BY key_code, ST_AsWKB(point) ORDER BY owner_lg, owner_id) = 1
 ),
--- ボロノイ図の外周は点の範囲で決まるので、小地域の外に遠い点を 4 つ足して小地域を覆う。
--- 小地域の大きさの 2 倍より遠い点は、小地域の中の切り分けを変えない
+-- ボロノイ図の外周は点の範囲で決まるので、遠い点を 4 つ足して小地域を覆う。
+-- 町字の代表点は小地域の外にもあるので、小地域と点を合わせた外接矩形 (一辺 d 以下) から 3d 離す。
+-- 矩形の中ではどの点からも √2·d 以内、足した点からは 3√2·d 以上なので、足した点は小地域の中を取らない
 frame AS (
-    SELECT
-        key_code,
-        geometry AS area,
-        ST_XMin(geometry) - 3 * d AS x0,
-        ST_YMin(geometry) - 3 * d AS y0,
-        ST_XMax(geometry) + 3 * d AS x1,
-        ST_YMax(geometry) + 3 * d AS y1
+    SELECT key_code, area, points, x0 - 3 * d AS x0, y0 - 3 * d AS y0, x1 + 3 * d AS x1, y1 + 3 * d AS y1
     FROM (
-        SELECT *, greatest(ST_XMax(geometry) - ST_XMin(geometry), ST_YMax(geometry) - ST_YMin(geometry)) AS d
-        FROM small_area
+        SELECT *, greatest(x1 - x0, y1 - y0) AS d
+        FROM (
+            SELECT
+                g.key_code,
+                s.geometry AS area,
+                g.points,
+                least(ST_XMin(s.geometry), g.px0) AS x0,
+                least(ST_YMin(s.geometry), g.py0) AS y0,
+                greatest(ST_XMax(s.geometry), g.px1) AS x1,
+                greatest(ST_YMax(s.geometry), g.py1) AS y1
+            FROM (
+                SELECT
+                    key_code,
+                    list(point) AS points,
+                    min(ST_X(point)) AS px0,
+                    min(ST_Y(point)) AS py0,
+                    max(ST_X(point)) AS px1,
+                    max(ST_Y(point)) AS py1
+                FROM generator
+                GROUP BY key_code
+            ) g
+            JOIN small_area s USING (key_code)
+        )
     )
 ),
 diagram AS (
-    SELECT f.key_code, f.area, unnest(ST_Dump(ST_VoronoiDiagram(ST_Collect(
-        g.points || [ST_Point(f.x0, f.y0), ST_Point(f.x1, f.y0), ST_Point(f.x0, f.y1), ST_Point(f.x1, f.y1)]
+    SELECT key_code, area, unnest(ST_Dump(ST_VoronoiDiagram(ST_Collect(
+        points || [ST_Point(x0, y0), ST_Point(x1, y0), ST_Point(x0, y1), ST_Point(x1, y1)]
     ))), recursive := true)
-    FROM (SELECT key_code, list(point) AS points FROM generator GROUP BY key_code) g
-    JOIN frame f USING (key_code)
+    FROM frame
 ),
 cut AS (
     SELECT g.owner_lg, g.owner_id, ST_Intersection(d.geom, d.area) AS geometry, true AS split
