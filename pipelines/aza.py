@@ -1,11 +1,14 @@
-"""法務省の地図の筆の形を、大字・丁目・小字ごとに合わせて市区町村ごとの Parquet にする。
+"""法務省の地図の筆の形を、大字・丁目・小字ごとに合わせて Parquet にする。
 
 筆は全国 2.45 億あり、dbt の 1 つの集約で合わせるとメモリに乗らないので、公開済みの
 moj.chizu.parcel を市区町村ごとに読んで合わせる。形の無い筆（任意座標系）と、図面の外の
 土地を指す筆（地番に「地区外」「別図」）は使わない。コードは登記所ごとに振られていることが
-あるので、コードと名前の組でまとめる。
+あるので、名前の組でまとめる。
 
-出力: data/aza/<lg_code>.parquet（models/main/town_shape.sql が読む）
+全国を合わせるには数時間かかる。法務省の地図は年 1 回しか変わらないので、前回公開した
+main.aza_shape が今の moj と同じバージョンから作ったものなら、それを使い回す。
+
+出力: data/aza/*.parquet（models/main/aza_shape.sql が読む）
 """
 
 import logging
@@ -19,13 +22,15 @@ logger = logging.getLogger("pipelines")
 
 AZA_DIR = Path("data/aza")
 MOJ = "ducklake:https://data.queria.io/datasets/queria/moj/ducklake.duckdb"
+PREVIOUS = "ducklake:https://data.queria.io/datasets/queria/japan_address_code/ducklake.duckdb"
 
 SQL = """
 COPY (
     SELECT
         lg_code, oaza, chome, koaza,
         count(*) AS parcels,
-        ST_AsWKB(ST_CollectionExtract(ST_MakeValid(ST_Union_Agg(geometry)), 3)) AS geometry
+        ST_AsWKB(ST_CollectionExtract(ST_MakeValid(ST_Union_Agg(geometry)), 3)) AS geometry,
+        '{moj_version}' AS moj_version
     FROM moj.chizu.parcel
     WHERE lg_code = '{lg_code}'
         AND geometry IS NOT NULL
@@ -38,6 +43,7 @@ COPY (
 """
 
 con: duckdb.DuckDBPyConnection | None = None
+moj_version = ""
 
 
 def connect() -> duckdb.DuckDBPyConnection:
@@ -47,29 +53,60 @@ def connect() -> duckdb.DuckDBPyConnection:
     return c
 
 
-def init_worker() -> None:
-    global con
+def init_worker(version: str) -> None:
+    global con, moj_version
     con = connect()
+    moj_version = version
 
 
 def union_city(lg_code: str) -> str:
+    assert lg_code.isdigit(), lg_code
     output = AZA_DIR / f"{lg_code}.parquet"
     partial = output.with_name(output.name + ".part")
-    assert lg_code.isdigit(), lg_code
-    con.execute(SQL.format(lg_code=lg_code, output=partial))
+    con.execute(SQL.format(lg_code=lg_code, moj_version=moj_version, output=partial))
     partial.replace(output)
     return lg_code
 
 
+def current_version(c: duckdb.DuckDBPyConnection) -> str:
+    """moj の今のバージョンの目印（最後のスナップショットの番号と時刻）。"""
+    snapshot_id, time = c.execute(
+        "SELECT snapshot_id, snapshot_time FROM ducklake_snapshots('moj') ORDER BY snapshot_id DESC LIMIT 1"
+    ).fetchone()
+    return f"{snapshot_id}@{time.isoformat()}"
+
+
+def reuse_previous(c: duckdb.DuckDBPyConnection, version: str) -> bool:
+    """前回の aza_shape が同じ moj から作ったものなら data/aza に書き出す。"""
+    try:
+        c.execute(f"ATTACH '{PREVIOUS}' AS previous (READ_ONLY)")
+        versions = c.execute("SELECT DISTINCT moj_version FROM previous.main.aza_shape").fetchall()
+    except duckdb.Error as e:
+        logger.info("  前回の aza_shape を読めない: %s", e)
+        return False
+    if versions != [(version,)]:
+        logger.info("  前回の aza_shape は別の moj から作ったもの: %s", versions)
+        return False
+    c.execute(
+        f"COPY (SELECT lg_code, oaza, chome, koaza, parcels, ST_AsWKB(geometry) AS geometry, moj_version "
+        f"FROM previous.main.aza_shape) TO '{AZA_DIR / 'previous.parquet'}' (FORMAT parquet, COMPRESSION zstd)"
+    )
+    return True
+
+
 def union_all() -> None:
-    """筆のある市区町村ごとに合わせる。毎回まるごと作り直す。"""
-    with connect() as c:
-        cities = [r[0] for r in c.execute("SELECT DISTINCT lg_code FROM moj.chizu.source ORDER BY 1").fetchall()]
     AZA_DIR.mkdir(parents=True, exist_ok=True)
     for old in AZA_DIR.glob("*.parquet*"):
         old.unlink()
-    logger.info("  %d 市区町村", len(cities))
-    with Pool(initializer=init_worker) as pool:
+    with connect() as c:
+        version = current_version(c)
+        logger.info("  moj のバージョン %s", version)
+        if reuse_previous(c, version):
+            logger.info("  前回の aza_shape を使い回す")
+            return
+        cities = [r[0] for r in c.execute("SELECT DISTINCT lg_code FROM moj.chizu.source ORDER BY 1").fetchall()]
+    logger.info("  %d 市区町村を合わせる", len(cities))
+    with Pool(initializer=init_worker, initargs=(version,)) as pool:
         for done, city in enumerate(pool.imap_unordered(union_city, cities), 1):
             if done % 100 == 0 or done == len(cities):
                 logger.info("  [%d/%d] %s", done, len(cities), city)

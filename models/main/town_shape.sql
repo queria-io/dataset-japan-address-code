@@ -4,7 +4,7 @@
 --   持ち主が複数   代表点 (住居表示の町字は小地域の中の街区の代表点) のボロノイ図で小地域を切り分ける
 -- 持ち主は小字でない町字と、名前で当たった小字。点だけで当たった小字は、その小地域に
 -- ほかの持ち主がいないときに限り、同じ大字・町 (町字 ID の末尾 000) を持ち主にする。
--- 法務省の地図の筆を大字・丁目・小字ごとに合わせた形 (main.py が data/aza に書く) が当たる町字は、筆で覆えた所を筆の形にし、
+-- 法務省の地図の筆を大字・丁目・小字ごとに合わせた形 (aza_shape) が当たる町字は、筆で覆えた所を筆の形にし、
 -- 覆えない所 (形の無い筆や登記の無い道路など) だけ小地域から作った形を残す。
 -- 形の無い小字には、同じ大字・町の形を渡す。作り方は shape_method:
 --   parcel      筆の形 (覆えない所は小地域から作った形)。筆の分は parcel_share
@@ -151,8 +151,8 @@ aza AS (
         regexp_replace(oaza, '^大字', '') AS oaza,
         coalesce(regexp_replace(translate(chome, '０１２３４５６７８９', '0123456789'), '[^0-9]', '', 'g'), '') AS chome,
         coalesce(koaza, '') AS koaza,
-        ST_GeomFromWKB(geometry) AS geometry
-    FROM read_parquet('data/aza/*.parquet')
+        geometry
+    FROM {{ ref('aza_shape') }}
 ),
 exact AS (
     SELECT lg_code, oaza, chome, koaza, count(*) AS n, any_value(machiaza_id) AS machiaza_id

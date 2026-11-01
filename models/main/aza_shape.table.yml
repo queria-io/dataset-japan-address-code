@@ -1,0 +1,36 @@
+schema: main
+name: aza_shape
+title: 法務省の地図の字の形
+description: |
+  登記所備付地図の筆の形を、市区町村・大字・丁目・小字の名前ごとに合わせた形。1 行が 1 つの大字・丁目・小字。town_shape の筆の形はこれを町字に当てたもの。
+  形を持つ筆（公共座標の図面の筆）だけを合わせるので、任意座標系の図面が多い地域では形が欠ける。地番に「地区外」「別図」とある筆は図面の外の土地を指すので使わない。登記の無い道路や水路は穴やすき間として残る。
+  「登記所備付地図データ」（法務省）（https://www.moj.go.jp/MINJI/minji05_00494.html）を加工して作成。
+keywords:
+  - 地番
+  - 筆
+  - 境界
+published: true
+sources:
+  - path: https://www.moj.go.jp/MINJI/minji05_00494.html
+fields:
+  - name: lg_code
+    title: 全国地方公共団体コード
+    description: "6桁（検査数字あり）"
+    semantic: { role: entity, name: city }
+  - name: oaza
+    title: 大字名
+    description: 原典のまま
+  - name: chome
+    title: 丁目名
+    description: 原典のまま全角数字（「３丁目」）
+  - name: koaza
+    title: 小字名
+  - name: parcels
+    title: 筆の数
+    description: 合わせた筆の数
+  - name: geometry
+    title: 形
+    description: 筆の形を合わせた形（POLYGON / MULTIPOLYGON、経緯度 JGD2011）
+  - name: moj_version
+    title: 元にした moj のバージョン
+    description: 合わせたときの queria/moj の最後のスナップショット（番号@時刻）。同じなら次のビルドで合わせ直さずに使い回す
