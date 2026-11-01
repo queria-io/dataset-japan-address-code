@@ -48,7 +48,7 @@ moj_version = ""
 
 def connect() -> duckdb.DuckDBPyConnection:
     c = duckdb.connect(config={"custom_user_agent": os.environ.get("QUERIA_USER_AGENT", "")})
-    c.execute("INSTALL spatial; LOAD spatial; INSTALL ducklake; INSTALL httpfs; SET threads = 1")
+    c.execute("INSTALL spatial; LOAD spatial; INSTALL ducklake; INSTALL httpfs; SET threads = 1; SET enable_progress_bar = false")
     c.execute(f"ATTACH '{MOJ}' AS moj (READ_ONLY)")
     return c
 
@@ -62,9 +62,13 @@ def init_worker(version: str) -> None:
 def union_city(lg_code: str) -> str:
     assert lg_code.isdigit(), lg_code
     output = AZA_DIR / f"{lg_code}.parquet"
+    if output.exists():
+        return lg_code
     partial = output.with_name(output.name + ".part")
     con.execute(SQL.format(lg_code=lg_code, moj_version=moj_version, output=partial))
-    partial.replace(output)
+    # 形のある筆が 1 つも無い市区町村は、DuckDB がファイルを作らない
+    if partial.exists():
+        partial.replace(output)
     return lg_code
 
 
@@ -87,6 +91,8 @@ def reuse_previous(c: duckdb.DuckDBPyConnection, version: str) -> bool:
     if versions != [(version,)]:
         logger.info("  前回の aza_shape は別の moj から作ったもの: %s", versions)
         return False
+    for old in AZA_DIR.glob("*.parquet*"):
+        old.unlink()
     c.execute(
         f"COPY (SELECT lg_code, oaza, chome, koaza, parcels, ST_AsWKB(geometry) AS geometry, moj_version "
         f"FROM previous.main.aza_shape) TO '{AZA_DIR / 'previous.parquet'}' (FORMAT parquet, COMPRESSION zstd)"
@@ -95,17 +101,23 @@ def reuse_previous(c: duckdb.DuckDBPyConnection, version: str) -> bool:
 
 
 def union_all() -> None:
+    """途中で止まったら、同じ moj のバージョンで済んだ市区町村は合わせ直さない。"""
     AZA_DIR.mkdir(parents=True, exist_ok=True)
-    for old in AZA_DIR.glob("*.parquet*"):
-        old.unlink()
+    marker = AZA_DIR / "moj_version"
     with connect() as c:
         version = current_version(c)
         logger.info("  moj のバージョン %s", version)
+        if not marker.exists() or marker.read_text() != version:
+            for old in AZA_DIR.glob("*.parquet*"):
+                old.unlink()
+            marker.write_text(version)
         if reuse_previous(c, version):
             logger.info("  前回の aza_shape を使い回す")
             return
         cities = [r[0] for r in c.execute("SELECT DISTINCT lg_code FROM moj.chizu.source ORDER BY 1").fetchall()]
     logger.info("  %d 市区町村を合わせる", len(cities))
+    for part in AZA_DIR.glob("*.part"):
+        part.unlink()
     with Pool(initializer=init_worker, initargs=(version,)) as pool:
         for done, city in enumerate(pool.imap_unordered(union_city, cities), 1):
             if done % 100 == 0 or done == len(cities):
