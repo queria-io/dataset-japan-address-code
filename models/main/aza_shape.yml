@@ -1,0 +1,20 @@
+version: 2
+models:
+- name: aza_shape
+  description: 登記所備付地図の筆の形を、市区町村・大字・丁目・小字の名前ごとに合わせた形。
+  access: public
+  columns:
+  - name: lg_code
+    data_type: varchar
+  - name: oaza
+    data_type: varchar
+  - name: chome
+    data_type: varchar
+  - name: koaza
+    data_type: varchar
+  - name: parcels
+    data_type: bigint
+  - name: geometry
+    data_type: geometry
+  - name: moj_version
+    data_type: varchar
