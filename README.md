@@ -10,7 +10,7 @@ Queria の公開データセット address_br・e_stat・moj を読んで作り�
 | --- | --- |
 | [アドレス・ベース・レジストリ](https://dataset.address-br.digital.go.jp/)（デジタル庁） | `address_br.main.mart_town`、`address_br.main.mart_rsdtdsp_blk` |
 | [国勢調査 町丁・字等別境界データ](https://www.e-stat.go.jp/gis)（総務省統計局、令和2年） | `e_stat.boundary.small_area` |
-| [登記所備付地図データ](https://www.moj.go.jp/MINJI/minji05_00494.html)（法務省） | `moj.chizu.aza` |
+| [登記所備付地図データ](https://www.moj.go.jp/MINJI/minji05_00494.html)（法務省） | `moj.chizu.parcel` |
 
 ## 収録テーブル
 
