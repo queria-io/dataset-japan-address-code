@@ -3,9 +3,11 @@ name: town_shape
 title: 町字の形
 description: |
   アドレス・ベース・レジストリの町字の形。公式の町字の形は無いので、国勢調査の小地域（令和2年）の形から作った。
-  小地域に町字が 1 つならその形、複数なら代表点のボロノイ図で切り分けた形。作り方は shape_method。
+  小地域に町字が 1 つならその形、複数なら代表点のボロノイ図で切り分けた形。
+  法務省の地図の筆の形がある町字は筆を合わせた形にし、筆で覆えない所だけ小地域から作った形を残す。作り方は shape_method。
   「アドレス・ベース・レジストリ」（デジタル庁）（https://dataset.address-br.digital.go.jp/）と
-  「国勢調査 町丁・字等別境界データ」（総務省統計局）（https://www.e-stat.go.jp/gis）を加工して作成。
+  「国勢調査 町丁・字等別境界データ」（総務省統計局）（https://www.e-stat.go.jp/gis）、
+  「登記所備付地図データ」（法務省）（https://www.moj.go.jp/MINJI/minji05_00494.html）を加工して作成。
 keywords:
   - 町字
   - 境界
@@ -13,6 +15,7 @@ published: true
 sources:
   - path: https://dataset.address-br.digital.go.jp/
   - path: https://www.e-stat.go.jp/gis
+  - path: https://www.moj.go.jp/MINJI/minji05_00494.html
 fields:
   - name: lg_code
     title: 全国地方公共団体コード
@@ -27,4 +30,7 @@ fields:
     description: "e_stat の small_area と同じ測地系"
   - name: shape_method
     title: 作り方
-    description: "small_area（当たる小地域の形をそのまま。複数なら合わせた形）、voronoi（少なくとも 1 つの小地域を、町字の代表点か住居表示の街区の代表点のボロノイ図で切り分けた）、parent_oaza（小字。同じ大字・町の形）"
+    description: "parcel（法務省の地図の筆を合わせた形。筆で覆えない所は下のどれかで作った形）、small_area（当たる小地域の形をそのまま。複数なら合わせた形）、voronoi（少なくとも 1 つの小地域を、町字の代表点か住居表示の街区の代表点のボロノイ図で切り分けた）、parent_oaza（小字。同じ大字・町の形）"
+  - name: parcel_share
+    title: 筆の形の割合
+    description: "形の面積のうち、筆を合わせた形が占める割合（0〜1）。parcel 以外は 0、parent_oaza は NULL"

@@ -18,3 +18,6 @@ package-lock.yml
 # Environment
 .env
 dist/
+
+# 法務省の地図の筆を合わせた中間ファイル (毎回作り直す)
+data/

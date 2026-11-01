@@ -4,7 +4,10 @@
 --   持ち主が複数   代表点 (住居表示の町字は小地域の中の街区の代表点) のボロノイ図で小地域を切り分ける
 -- 持ち主は小字でない町字と、名前で当たった小字。点だけで当たった小字は、その小地域に
 -- ほかの持ち主がいないときに限り、同じ大字・町 (町字 ID の末尾 000) を持ち主にする。
+-- 法務省の地図の筆を大字・丁目・小字ごとに合わせた形 (main.py が data/aza に書く) が当たる町字は、筆で覆えた所を筆の形にし、
+-- 覆えない所 (形の無い筆や登記の無い道路など) だけ小地域から作った形を残す。
 -- 形の無い小字には、同じ大字・町の形を渡す。作り方は shape_method:
+--   parcel      筆の形 (覆えない所は小地域から作った形)。筆の分は parcel_share
 --   small_area  小地域の形をそのまま (複数なら合わせた形)
 --   voronoi     少なくとも 1 つの小地域を点で切り分けた
 --   parent_oaza 小字。同じ大字・町の形
@@ -136,14 +139,84 @@ own AS (
     WHERE NOT ST_IsEmpty(geometry)
     GROUP BY owner_lg, owner_id
 ),
+-- 法務省の地図の字を町字に当てる。大字・丁目・小字の名前がそろう町字に当て、無ければ同じ大字・丁目で
+-- 小字の無い町字に当てる。当てる先が 2 つ以上ある字は使わない。丁目は数字だけで比べる
+town_name AS (
+    SELECT DISTINCT lg_code, machiaza_id, oaza_cho AS oaza, coalesce(chome_number, '') AS chome, coalesce(koaza, '') AS koaza
+    FROM address_br.main.mart_town
+),
+aza AS (
+    SELECT
+        lg_code,
+        regexp_replace(oaza, '^大字', '') AS oaza,
+        coalesce(regexp_replace(translate(chome, '０１２３４５６７８９', '0123456789'), '[^0-9]', '', 'g'), '') AS chome,
+        coalesce(koaza, '') AS koaza,
+        ST_GeomFromWKB(geometry) AS geometry
+    FROM read_parquet('data/aza/*.parquet')
+),
+exact AS (
+    SELECT lg_code, oaza, chome, koaza, count(*) AS n, any_value(machiaza_id) AS machiaza_id
+    FROM town_name
+    GROUP BY ALL
+),
+fold AS (
+    SELECT lg_code, oaza, chome, count(*) AS n, any_value(machiaza_id) AS machiaza_id
+    FROM town_name
+    WHERE koaza = ''
+    GROUP BY ALL
+),
+parcel AS (
+    SELECT lg_code, machiaza_id, ST_CollectionExtract(ST_MakeValid(ST_Union_Agg(geometry)), 3) AS geometry
+    FROM (
+        SELECT
+            a.lg_code,
+            CASE WHEN e.n = 1 THEN e.machiaza_id WHEN e.n IS NULL AND f.n = 1 THEN f.machiaza_id END AS machiaza_id,
+            a.geometry
+        FROM aza a
+        LEFT JOIN exact e USING (lg_code, oaza, chome, koaza)
+        LEFT JOIN fold f USING (lg_code, oaza, chome)
+    )
+    WHERE machiaza_id IS NOT NULL
+    GROUP BY lg_code, machiaza_id
+),
+-- 小地域から作った形のうち、どの町字かの筆で覆えた所。市区町村をまたいで重ねる
+covered AS (
+    SELECT o.lg_code, o.machiaza_id, ST_Union_Agg(p.geometry) AS geometry
+    FROM own o
+    JOIN parcel p ON ST_Intersects(o.geometry, p.geometry)
+    GROUP BY o.lg_code, o.machiaza_id
+),
+merged AS (
+    SELECT
+        lg_code,
+        machiaza_id,
+        ST_CollectionExtract(ST_MakeValid(ST_Union(
+            coalesce(p.geometry, ST_GeomFromText('POLYGON EMPTY')),
+            CASE
+                WHEN o.geometry IS NULL THEN ST_GeomFromText('POLYGON EMPTY')
+                WHEN c.geometry IS NULL THEN o.geometry
+                ELSE ST_Difference(o.geometry, c.geometry)
+            END
+        )), 3) AS geometry,
+        CASE WHEN p.geometry IS NULL THEN o.shape_method ELSE 'parcel' END AS shape_method,
+        ST_Area(p.geometry) AS parcel_area
+    FROM own o
+    FULL JOIN parcel p USING (lg_code, machiaza_id)
+    LEFT JOIN covered c USING (lg_code, machiaza_id)
+),
+shaped AS (
+    SELECT lg_code, machiaza_id, geometry, shape_method, least(coalesce(parcel_area, 0) / ST_Area(geometry), 1) AS parcel_share
+    FROM merged
+    WHERE NOT ST_IsEmpty(geometry)
+),
 koaza AS (
-    SELECT t.lg_code, t.machiaza_id, o.geometry, 'parent_oaza' AS shape_method
+    SELECT t.lg_code, t.machiaza_id, o.geometry, 'parent_oaza' AS shape_method, NULL::DOUBLE AS parcel_share
     FROM town t
-    JOIN own o ON o.lg_code = t.lg_code AND o.machiaza_id = left(t.machiaza_id, 4) || '000'
+    JOIN shaped o ON o.lg_code = t.lg_code AND o.machiaza_id = left(t.machiaza_id, 4) || '000'
     WHERE t.is_koaza
-        AND NOT EXISTS (SELECT 1 FROM own x WHERE x.lg_code = t.lg_code AND x.machiaza_id = t.machiaza_id)
+        AND NOT EXISTS (SELECT 1 FROM shaped x WHERE x.lg_code = t.lg_code AND x.machiaza_id = t.machiaza_id)
 )
-SELECT * FROM own
+SELECT * FROM shaped
 UNION ALL
 SELECT * FROM koaza
 ORDER BY lg_code, machiaza_id

@@ -3,7 +3,9 @@ models:
 - name: town_shape
   description: 'アドレス・ベース・レジストリの町字の形。公式の町字の形は無いので、国勢調査の小地域（令和2年）の形から作った。
 
-    小地域に町字が 1 つならその形、複数なら代表点のボロノイ図で切り分けた形。作り方は shape_method。
+    小地域に町字が 1 つならその形、複数なら代表点のボロノイ図で切り分けた形。
+
+    法務省の地図の筆の形がある町字は筆を合わせた形にし、筆で覆えない所だけ小地域から作った形を残す。作り方は shape_method。
 
     「アドレス・ベース・レジストリ」（デジタル庁）（https://dataset.address-br.digital.go.jp/）と
 
@@ -20,3 +22,5 @@ models:
     data_type: geometry
   - name: shape_method
     data_type: varchar
+  - name: parcel_share
+    data_type: double
