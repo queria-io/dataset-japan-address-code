@@ -129,7 +129,8 @@ own AS (
     SELECT
         owner_lg AS lg_code,
         owner_id AS machiaza_id,
-        ST_Union_Agg(geometry) AS geometry,
+        -- 合わせた形が不正 (自己交差など) になる行があるので直し、面だけを残す
+        ST_CollectionExtract(ST_MakeValid(ST_Union_Agg(geometry)), 3) AS geometry,
         CASE WHEN bool_or(split) THEN 'voronoi' ELSE 'small_area' END AS shape_method
     FROM (SELECT * FROM whole UNION ALL SELECT * FROM cut)
     WHERE NOT ST_IsEmpty(geometry)
