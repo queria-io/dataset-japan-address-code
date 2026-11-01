@@ -1,0 +1,22 @@
+version: 2
+models:
+- name: small_area_mesh
+  description: '国勢調査の小地域（令和2年）と 3 次メッシュ（標準地域メッシュ、約 1km 四方）の重なり。1 行が小地域とメッシュの 1 組。
+
+    重なりの面積と、小地域・メッシュそれぞれに占める割合を持つので、小地域の集計値をメッシュへ、メッシュの集計値を小地域へ面積で按分できる。
+
+    「国勢調査 町丁・字等別境界データ」（総務省統計局）（https://www.e-stat.go.jp/gis）を加工して作成。
+
+    '
+  access: public
+  columns:
+  - name: key_code
+    data_type: varchar
+  - name: mesh_code
+    data_type: varchar
+  - name: area_m2
+    data_type: double
+  - name: small_area_share
+    data_type: double
+  - name: mesh_share
+    data_type: double

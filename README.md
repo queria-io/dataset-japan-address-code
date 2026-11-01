@@ -17,6 +17,7 @@ Queria の公開データセット address_br と e_stat を読んで作りま�
 | --- | --- |
 | `main.town_small_area` | 1 行が町字と小地域の 1 組。対応の種類・按分の割合・当て方 |
 | `main.town_shape` | 1 行が 1 町字の形。作り方は `shape_method` |
+| `main.small_area_mesh` | 1 行が小地域と 3 次メッシュ（約 1km）の 1 組。重なりの面積と、それぞれに占める割合 |
 
 - 町字は `lg_code`（6 桁）と `machiaza_id`（7 桁）の組で一意です。`machiaza_id` だけで結合しないでください
 - 名前は同じ市区町村の中で突き合わせます。ABR の「１丁目」と小地域の「一丁目」のような数字の書き方はそろえます
