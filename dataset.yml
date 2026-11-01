@@ -1,4 +1,6 @@
-spec_version: "0.1"
+# この dataset.yml は fdl commit が読む（FDL の dataset.json を YAML で書いたもの）。
+# 表の説明は models/ の *.table.yml に書く。表と列の型・NULL・行数は fdl commit がカタログから埋める。
+# Queria だけの項目（テーマ・カバー・列の意味）は extensions.queria に書く。
 name: japan_address_code
 title: 住所コード対応表
 description: |-
@@ -13,7 +15,6 @@ keywords:
   - 地域コード
 homepage: https://github.com/queria-io/dataset-japan-address-code
 language: ja
-themes: [land_climate]
 
 licenses:
   - JP-DIGITAL-ADDRESS-BR
@@ -43,19 +44,22 @@ contributors:
 
 spatial_coverage: [JP]
 update_frequency: monthly
-cover: 🔗
-
-ai_context:
-  instructions: |
-    町字（address_br の lg_code, machiaza_id）と国勢調査の小地域（e_stat の key_code）をつなぐのに使う。
-    town_small_area は町字と小地域の 1 組が 1 行。町字と小地域は 1 対 1 とは限らないので match_type を見る。
-    按分するときは town_share（町字のうちこの小地域に入る割合）と small_area_share（小地域のうちこの町字に入る割合）を使い、
-    空の行は割合が出せていない。town_shape は町字の形で、作り方は shape_method。
-  synonyms: [住所 ID 対応表, 町字 小地域 対応, crosswalk]
-  examples:
-    - 町字ごとの人口を国勢調査の小地域から出したい
-    - 住所の町字を小地域コードに変えたい
 
 schemas:
   - name: main
     title: メイン
+
+extensions:
+  queria:
+    themes: [land_climate]
+    cover: 🔗
+    ai_context:
+      instructions: |
+        町字（address_br の lg_code, machiaza_id）と国勢調査の小地域（e_stat の key_code）をつなぐのに使う。
+        town_small_area は町字と小地域の 1 組が 1 行。町字と小地域は 1 対 1 とは限らないので match_type を見る。
+        按分するときは town_share（町字のうちこの小地域に入る割合）と small_area_share（小地域のうちこの町字に入る割合）を使い、
+        空の行は割合が出せていない。town_shape は町字の形で、作り方は shape_method。
+      synonyms: [住所 ID 対応表, 町字 小地域 対応, crosswalk]
+      examples:
+        - 町字ごとの人口を国勢調査の小地域から出したい
+        - 住所の町字を小地域コードに変えたい

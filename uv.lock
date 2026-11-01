@@ -214,14 +214,14 @@ source = { virtual = "." }
 dependencies = [
     { name = "dbt-core" },
     { name = "dbt-duckdb" },
-    { name = "queria" },
+    { name = "fdl-cli" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "dbt-core", specifier = ">=1.11.2" },
     { name = "dbt-duckdb", specifier = ">=1.10.0" },
-    { name = "queria", specifier = ">=0.22.0" },
+    { name = "fdl-cli", specifier = ">=0.15.0" },
 ]
 
 [[package]]
@@ -395,15 +395,16 @@ wheels = [
 
 [[package]]
 name = "fdl-cli"
-version = "0.13.0"
+version = "0.15.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "duckdb" },
+    { name = "pyyaml" },
     { name = "typer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7e/75/cb945ea2df7bad3aed5ff20d734ebebbb0ac12cb686946ce81cb480434e8/fdl_cli-0.13.0.tar.gz", hash = "sha256:ac87706cda6d0b8466acce3494a4844ea4fbf20cf7fbd6efea2aa2cf15ce3e47", size = 112641, upload-time = "2026-11-01T01:12:43.067Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/97/f8/4b31ba6bf7e28c5eb1a8cb5c8528cb797f2809c4549c486c4d2e73b5fc46/fdl_cli-0.15.0.tar.gz", hash = "sha256:ca9476e5248fdf75940acc20aac42382e5b84bef72a145c7bc6bbc525e6e9041", size = 265134, upload-time = "2026-11-01T05:32:12.836Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b6/ff/bb7eb1699b447d720046db15097b5b1cd21294c9922b33b3dfbb403ae345/fdl_cli-0.13.0-py3-none-any.whl", hash = "sha256:9edb2f8cdc06853b2638a28eeef78b9fe630ef083f5311857f9eb502baf104ff", size = 25177, upload-time = "2026-11-01T01:12:41.794Z" },
+    { url = "https://files.pythonhosted.org/packages/6d/f1/b34af6129be307d05c50e4002e1a006cccef9c9db79ebf3d175aadbe8326/fdl_cli-0.15.0-py3-none-any.whl", hash = "sha256:8d57fafd8c60af723f82e6bce76b9ebf18320440b7112f35abe9256dfa75967b", size = 31724, upload-time = "2026-11-01T05:32:11.436Z" },
 ]
 
 [[package]]
@@ -986,21 +987,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/da/92/1446574745d74df0c92e6aa4a7b0b3130706a4142b2d1a5869f2eaa423c6/pyyaml-6.0.3-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:16249ee61e95f858e83976573de0f5b2893b3677ba71c9dd36b9cf8be9ac6d65", size = 829923, upload-time = "2025-09-25T21:32:54.537Z" },
     { url = "https://files.pythonhosted.org/packages/f0/7a/1c7270340330e575b92f397352af856a8c06f230aa3e76f86b39d01b416a/pyyaml-6.0.3-cp314-cp314t-win_amd64.whl", hash = "sha256:4ad1906908f2f5ae4e5a8ddfce73c320c2a1429ec52eafd27138b7f1cbe341c9", size = 174062, upload-time = "2025-09-25T21:32:55.767Z" },
     { url = "https://files.pythonhosted.org/packages/f1/12/de94a39c2ef588c7e6455cfbe7343d3b2dc9d6b6b2f40c4c6565744c873d/pyyaml-6.0.3-cp314-cp314t-win_arm64.whl", hash = "sha256:ebc55a14a21cb14062aa4162f906cd962b28e2e9ea38f9b4391244cd8de4ae0b", size = 149341, upload-time = "2025-09-25T21:32:56.828Z" },
-]
-
-[[package]]
-name = "queria"
-version = "0.45.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "duckdb" },
-    { name = "fdl-cli" },
-    { name = "jsonschema" },
-    { name = "pyyaml" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/33/d8/84ee7d7e8e1b784eacc2136119a85235ea4405c5d9efcf756b02349495fc/queria-0.45.1.tar.gz", hash = "sha256:524d98a5d50dc5b36dc812a8430240b726899a650569f34f7db4442fa7eec25a", size = 401347, upload-time = "2026-11-01T00:50:11.365Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f1/3a/ae21509caf26becc81451de3715dd88115f2fbf7de3e980585da22203916/queria-0.45.1-py3-none-any.whl", hash = "sha256:be559423313ed6e5ead19a562ae57daec2c93cbad81f07703b40bdfd3a17e174", size = 168932, upload-time = "2026-11-01T00:50:09.752Z" },
 ]
 
 [[package]]

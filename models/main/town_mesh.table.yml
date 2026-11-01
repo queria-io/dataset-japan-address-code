@@ -12,7 +12,6 @@ keywords:
   - メッシュ
   - 対応表
   - 按分
-published: true
 sources:
   - path: https://dataset.address-br.digital.go.jp/
   - path: https://www.e-stat.go.jp/gis
@@ -20,15 +19,15 @@ fields:
   - name: lg_code
     title: 全国地方公共団体コード
     description: "6桁（検査数字あり）"
-    semantic: { role: entity, name: city }
+    extensions: { queria: { semantic: { role: entity, name: city } } }
   - name: machiaza_id
     title: 町字ID
     description: "7桁。lg_code との組で一意"
-    semantic: { role: entity, name: town }
+    extensions: { queria: { semantic: { role: entity, name: town } } }
   - name: mesh_code
     title: 3 次メッシュコード
     description: "8桁。標準地域メッシュの 3 次メッシュ（緯度 30 秒 × 経度 45 秒）"
-    semantic: { role: entity, name: mesh }
+    extensions: { queria: { semantic: { role: entity, name: mesh } } }
   - name: area_m2
     title: 重なりの面積（平方メートル）
     description: "経緯度の面積をメッシュの中心の緯度で平方メートルに直した近似値"
