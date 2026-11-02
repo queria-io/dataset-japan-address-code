@@ -19,11 +19,11 @@ fields:
   - name: lg_code
     title: 全国地方公共団体コード
     description: "6桁（検査数字あり）"
-    extensions: { queria: { semantic: { role: entity, name: city } } }
+    annotations: { queria: { semantic: { role: entity, name: city } } }
   - name: machiaza_id
     title: 町字ID
     description: "7桁。lg_code との組で一意"
-    extensions: { queria: { semantic: { role: entity, name: town } } }
+    annotations: { queria: { semantic: { role: entity, name: town } } }
   - name: geometry
     title: 形
     description: "e_stat の small_area と同じ測地系"
