@@ -39,7 +39,13 @@ WHERE t.match_type = 'one_to_one'
 
 ## ビルド
 
+全国のビルドは GitHub のランナーのメモリに収まらないので、メモリの多い手元の Mac で流します。
+毎月 address_br の更新の翌日に `Check upstream` のワークフローが元のデータセットを確かめ、
+address_br か moj が新しくなっていれば Discord に知らせます。知らせが来たら次を流します。
+
 ```bash
 uv sync
-scripts/build.sh
+FDL_TOKEN=... scripts/build.sh
 ```
+
+法務省の地図の字の形（aza_shape）は、moj が変わっていなければ公開中のものを使い回します。
