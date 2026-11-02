@@ -1,0 +1,27 @@
+name: Check upstream
+
+# 全国のビルドは GitHub のランナーのメモリに収まらないので手元で流す (README の「ビルド」)。
+# ここは元のデータセットが新しくなったかだけを見て、作り直しが要れば Discord に知らせる
+on:
+  schedule:
+    - cron: "0 19 2 * *" # address_br の Sync（0 19 1 * *）の翌日
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
+      - id: check
+        run: echo "stale=$(uv run --no-project --with duckdb==1.5.6 python scripts/check_upstream.py | paste -sd, -)" >> "$GITHUB_OUTPUT"
+      - name: Notify Discord
+        if: steps.check.outputs.stale != ''
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          STALE: ${{ steps.check.outputs.stale }}
+        run: |
+          [ -n "$WEBHOOK" ] || exit 0
+          curl -s -H "Content-Type: application/json" \
+            -d "{\"embeds\": [{\"title\": \"Rebuild needed\", \"url\": \"${{ github.server_url }}/${{ github.repository }}\", \"color\": 15105570, \"fields\": [{\"name\": \"Repository\", \"value\": \"${{ github.repository }}\"}, {\"name\": \"Updated upstream\", \"value\": \"$STALE\"}]}]}" \
+            "$WEBHOOK"
