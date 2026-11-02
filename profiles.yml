@@ -13,13 +13,11 @@ japan_address_code:
         - sqlite
         # 地理空間の型を使わないデータセットでは外す。excel など、読み込みに要る拡張はここに足す
         - spatial
-      # GitHub のランナー (16GB) では、town_shape の形の演算がメモリを使い切って
-      # ランナーごと落ちる。形の演算のメモリは DuckDB の上限の外で取られるので、
-      # 上限を低めにして余りを残し、並列も絞る
+      # GitHub のランナーは 16GB。形の演算のメモリの一部は DuckDB の上限の外で取られるので、
+      # 上限を低めにして余りを残す (town_shape は都道府県ごとに流す)
       settings:
         memory_limit: "10GB"
-        threads: 1
-        preserve_insertion_order: false
+        threads: 2
       # ビルドが公開ストレージを読むときの名乗り。build-fdl.sh が
       # queria-build として渡す。無いと data.queria.io の利用統計に
       # 自分のビルドが利用者として混ざる。
