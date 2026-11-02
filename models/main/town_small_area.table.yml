@@ -17,15 +17,15 @@ fields:
   - name: lg_code
     title: 全国地方公共団体コード
     description: "6桁（検査数字あり）"
-    extensions: { queria: { semantic: { role: entity, name: city } } }
+    annotations: { queria: { semantic: { role: entity, name: city } } }
   - name: machiaza_id
     title: 町字ID
     description: "7桁。lg_code との組で一意"
-    extensions: { queria: { semantic: { role: entity, name: town } } }
+    annotations: { queria: { semantic: { role: entity, name: town } } }
   - name: key_code
     title: 小地域コード
     description: "国勢調査の KEY_CODE（9桁または11桁）。当たる小地域が無い町字は空"
-    extensions: { queria: { semantic: { role: entity, name: small_area } } }
+    annotations: { queria: { semantic: { role: entity, name: small_area } } }
   - name: match_type
     title: 対応の種類
     description: "one_to_one（互いに 1 つだけ）、town_split（町字が複数の小地域に分かれる）、towns_merged（複数の町字が 1 つの小地域に入る）、many_to_many（両方）"

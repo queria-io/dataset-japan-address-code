@@ -16,11 +16,11 @@ fields:
   - name: key_code
     title: 小地域コード
     description: "国勢調査の KEY_CODE（9桁または11桁）"
-    extensions: { queria: { semantic: { role: entity, name: small_area } } }
+    annotations: { queria: { semantic: { role: entity, name: small_area } } }
   - name: mesh_code
     title: 3 次メッシュコード
     description: "8桁。標準地域メッシュの 3 次メッシュ（緯度 30 秒 × 経度 45 秒）"
-    extensions: { queria: { semantic: { role: entity, name: mesh } } }
+    annotations: { queria: { semantic: { role: entity, name: mesh } } }
   - name: area_m2
     title: 重なりの面積（平方メートル）
     description: "経緯度の面積をメッシュの中心の緯度で平方メートルに直した近似値。小地域ごとの合計は e_stat の small_area.area_m2 とほぼ一致する（千代田区で 0.2% 差）"
