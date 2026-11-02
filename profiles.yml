@@ -17,8 +17,8 @@ japan_address_code:
       # ランナーごと落ちる。形の演算のメモリは DuckDB の上限の外で取られるので、
       # 上限を低めにして余りを残し、並列も絞る
       settings:
-        memory_limit: "6GB"
-        threads: 2
+        memory_limit: "10GB"
+        threads: 1
         preserve_insertion_order: false
       # ビルドが公開ストレージを読むときの名乗り。build-fdl.sh が
       # queria-build として渡す。無いと data.queria.io の利用統計に
