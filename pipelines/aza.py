@@ -13,6 +13,7 @@ main.aza_shape が今の moj と同じバージョンから作ったものなら
 
 import logging
 import os
+from datetime import datetime, timezone
 from multiprocessing import Pool
 from pathlib import Path
 
@@ -77,7 +78,13 @@ def current_version(c: duckdb.DuckDBPyConnection) -> str:
     snapshot_id, time = c.execute(
         "SELECT snapshot_id, snapshot_time FROM ducklake_snapshots('moj') ORDER BY snapshot_id DESC LIMIT 1"
     ).fetchone()
-    return f"{snapshot_id}@{time.isoformat()}"
+    return f"{snapshot_id}@{time.astimezone(timezone.utc).isoformat()}"
+
+
+def same_version(a: str, b: str) -> bool:
+    """目印が同じスナップショットを指すか。時刻は書いた手元の時間帯によらず瞬間で比べる。"""
+    (id_a, time_a), (id_b, time_b) = (v.split("@", 1) for v in (a, b))
+    return id_a == id_b and datetime.fromisoformat(time_a) == datetime.fromisoformat(time_b)
 
 
 def reuse_previous(c: duckdb.DuckDBPyConnection, version: str) -> bool:
@@ -88,7 +95,7 @@ def reuse_previous(c: duckdb.DuckDBPyConnection, version: str) -> bool:
     except duckdb.Error as e:
         logger.info("  前回の aza_shape を読めない: %s", e)
         return False
-    if versions != [(version,)]:
+    if len(versions) != 1 or not same_version(versions[0][0], version):
         logger.info("  前回の aza_shape は別の moj から作ったもの: %s", versions)
         return False
     for old in AZA_DIR.glob("*.parquet*"):
