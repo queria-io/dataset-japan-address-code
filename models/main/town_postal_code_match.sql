@@ -2,20 +2,17 @@
 -- 町字と郵便番号の町域を名前で突き合わせる (町字マスタの郵便番号の有無によらず全町字)。
 -- town_postal_code が使い、町字マスタに郵便番号がある町字は答え合わせ (tests/town_postal_code_accuracy.sql) に使う。
 -- 大字・町の無い小字だけの町字 (松本市の「芳川平田」など) は小字の名前で突き合わせる
-{%- macro normalize(expr) -%}
-{{ kanji_number("translate(regexp_replace(regexp_replace(" ~ expr ~ ", '大字', '', 'g'), '^字', ''), '曾峯澤瀧驒嶋萊篭龍狹檮鶯竈瀨辨蒄藪繫溪鷆のヶヵ', '曽峰沢滝騨島莱籠竜狭梼鴬竃瀬弁蔲薮繋渓鷏ノケカ')") }}
-{%- endmacro %}
 WITH town AS (
     SELECT lg_code, machiaza_id, any_value(coalesce(oaza_cho, koaza)) AS oaza_cho
     FROM address_br.main.mart_town
     GROUP BY lg_code, machiaza_id
 ),
 named AS (
-    SELECT lg_code, machiaza_id, {{ normalize('oaza_cho') }} AS name
+    SELECT lg_code, machiaza_id, {{ town_name_normalize('oaza_cho') }} AS name
     FROM town
 ),
 zip AS (
-    SELECT DISTINCT lg_code, zipcode, {{ normalize("regexp_replace(town, '（.*$', '')") }} AS name
+    SELECT DISTINCT lg_code, zipcode, {{ town_name_normalize("regexp_replace(town, '（.*$', '')") }} AS name
     FROM zipcode.main.mart_zipcode
     -- 「以下に掲載がない場合」「中津市の次に番地がくる場合」は市区町村全体の郵便番号なので名前の突き合わせに使わない
     WHERE town <> '以下に掲載がない場合' AND NOT ends_with(town, '次に番地がくる場合')
