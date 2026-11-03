@@ -4,10 +4,12 @@
 --   abr     ABR の町字マスタの郵便番号
 --   name    町域の名前が大字・町の名前と同じ
 --   prefix  町域の名前が大字・町の名前の頭と同じ (ABR の「里白石字小野久保」に郵便番号の「里白石」)。最も長いもの
---   city    当たる町域が無いので、市区町村の「以下に掲載がない場合」の郵便番号
+--   sub     町域が大字・町より細かく分かれていて (「南田中西原」「南田中北原」…)、それが全部同じ郵便番号
+--   city    当たる町域が無いので、市区町村の「以下に掲載がない場合」の郵便番号。村全体で 1 つ (「山形村一円」) ならそれ
+-- 名前は「大字」と頭の「字」を外し、全角数字を漢数字に、異体字 (曾・峯・澤・瀧・驒 など) と「の」を片方にそろえる。
 -- 町域の括弧書き (丁目・番地の範囲) は名前から外して比べる。ビルの階ごとの郵便番号は使わない
 {%- macro normalize(expr) -%}
-{{ kanji_number("translate(regexp_replace(regexp_replace(" ~ expr ~ ", '大字', '', 'g'), '^字', ''), 'ヶヵ', 'ケカ')") }}
+{{ kanji_number("translate(regexp_replace(regexp_replace(" ~ expr ~ ", '大字', '', 'g'), '^字', ''), '曾峯澤瀧驒嶋萊篭龍狹檮鶯竈瀨辨蒄藪繫溪鷆のヶヵ', '曽峰沢滝騨島莱籠竜狭梼鴬竃瀬弁蔲薮繋渓鷏ノケカ')") }}
 {%- endmacro %}
 WITH town AS (
     SELECT lg_code, machiaza_id, any_value(oaza_cho) AS oaza_cho, any_value(post_code) FILTER (WHERE post_code IS NOT NULL) AS post_code
@@ -24,10 +26,13 @@ zip AS (
     WHERE town <> '以下に掲載がない場合' AND NOT regexp_matches(town, '（.*階.*）$')
 ),
 city AS (
-    SELECT lg_code, any_value(zipcode) AS zipcode
+    SELECT lg_code, coalesce(
+        any_value(zipcode) FILTER (WHERE town = '以下に掲載がない場合'),
+        CASE WHEN count(DISTINCT zipcode) = 1 THEN any_value(zipcode) END
+    ) AS zipcode
     FROM zipcode.main.mart_zipcode
-    WHERE town = '以下に掲載がない場合'
     GROUP BY lg_code
+    HAVING zipcode IS NOT NULL
 ),
 abr AS (
     SELECT lg_code, machiaza_id, replace(post_code, '-', '') AS zipcode, 'abr' AS match_type
@@ -48,10 +53,21 @@ prefix AS (
         AND NOT EXISTS (SELECT 1 FROM exact e WHERE e.lg_code = t.lg_code AND e.machiaza_id = t.machiaza_id)
     QUALIFY rank() OVER (PARTITION BY t.lg_code, t.machiaza_id ORDER BY length(z.name) DESC) = 1
 ),
+sub AS (
+    SELECT t.lg_code, t.machiaza_id, any_value(z.zipcode) AS zipcode, 'sub' AS match_type
+    FROM named t
+    JOIN zip z ON z.lg_code = t.lg_code AND length(t.name) >= 2 AND starts_with(z.name, t.name)
+    WHERE t.post_code IS NULL
+        AND NOT EXISTS (SELECT 1 FROM exact e WHERE e.lg_code = t.lg_code AND e.machiaza_id = t.machiaza_id)
+        AND NOT EXISTS (SELECT 1 FROM prefix e WHERE e.lg_code = t.lg_code AND e.machiaza_id = t.machiaza_id)
+    GROUP BY t.lg_code, t.machiaza_id
+    HAVING count(DISTINCT z.zipcode) = 1
+),
 matched AS (
     SELECT * FROM abr
     UNION ALL SELECT * FROM exact
     UNION ALL SELECT * FROM prefix
+    UNION ALL SELECT * FROM sub
 )
 SELECT * FROM matched
 UNION ALL

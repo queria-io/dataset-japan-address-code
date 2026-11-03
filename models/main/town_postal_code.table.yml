@@ -29,4 +29,4 @@ fields:
     annotations: { queria: { semantic: { role: entity, name: postal_code } } }
   - name: match_type
     title: 当て方
-    description: "abr（町字マスタの郵便番号）、name（町域の名前が大字・町の名前と同じ）、prefix（町域の名前が大字・町の名前の頭と同じ。最も長いもの）、city（当たる町域が無く、市区町村の「以下に掲載がない場合」の郵便番号）"
+    description: "abr（町字マスタの郵便番号）、name（町域の名前が大字・町の名前と同じ）、prefix（町域の名前が大字・町の名前の頭と同じ。最も長いもの）、sub（町域が大字・町より細かく分かれていて、全部同じ郵便番号）、city（当たる町域が無く、市区町村の「以下に掲載がない場合」の郵便番号）"
