@@ -9,9 +9,13 @@
 -- 名前の突き合わせは town_postal_code_match。名前は「大字」と頭の「字」を外し、全角数字を漢数字に、異体字 (曾・峯・澤・瀧・驒 など) と「の」を片方にそろえる。
 -- 町域の括弧書き (丁目・番地の範囲) は名前から外して比べる。ビルの階ごとの郵便番号は使わない
 WITH town AS (
-    SELECT lg_code, machiaza_id, replace(any_value(post_code) FILTER (WHERE post_code IS NOT NULL), '-', '') AS post_code
+    SELECT DISTINCT lg_code, machiaza_id FROM address_br.main.mart_town
+),
+-- 町字マスタの郵便番号は「6008049;6008050」のように ; で複数並ぶことがある
+abr AS (
+    SELECT DISTINCT lg_code, machiaza_id, replace(trim(unnest(string_split(post_code, ';'))), '-', '') AS zipcode
     FROM address_br.main.mart_town
-    GROUP BY lg_code, machiaza_id
+    WHERE post_code IS NOT NULL
 ),
 city AS (
     SELECT lg_code, coalesce(
@@ -23,14 +27,12 @@ city AS (
     HAVING zipcode IS NOT NULL
 ),
 matched AS (
-    SELECT lg_code, machiaza_id, post_code AS zipcode, 'abr' AS match_type
-    FROM town
-    WHERE post_code IS NOT NULL
+    SELECT lg_code, machiaza_id, zipcode, 'abr' AS match_type
+    FROM abr
     UNION ALL
     SELECT m.*
     FROM {{ ref('town_postal_code_match') }} m
-    JOIN town t USING (lg_code, machiaza_id)
-    WHERE t.post_code IS NULL
+    WHERE NOT EXISTS (SELECT 1 FROM abr a WHERE a.lg_code = m.lg_code AND a.machiaza_id = m.machiaza_id)
 )
 SELECT * FROM matched
 UNION ALL

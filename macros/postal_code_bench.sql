@@ -5,10 +5,10 @@
 #}
 {% macro postal_code_bench() %}
 WITH truth AS (
-    SELECT lg_code, machiaza_id, replace(any_value(post_code), '-', '') AS zipcode
+    -- 町字マスタの郵便番号は ; で複数並ぶことがある。どれかが当たれば正解
+    SELECT DISTINCT lg_code, machiaza_id, replace(trim(unnest(string_split(post_code, ';'))), '-', '') AS zipcode
     FROM address_br.main.mart_town
     WHERE post_code IS NOT NULL
-    GROUP BY lg_code, machiaza_id
 ),
 judged AS (
     SELECT t.lg_code, t.machiaza_id,
