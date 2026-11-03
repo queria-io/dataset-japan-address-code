@@ -1,0 +1,4 @@
+version: 2
+models:
+- name: town_postal_code
+  access: public

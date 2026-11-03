@@ -1,0 +1,32 @@
+schema: main
+name: town_postal_code
+title: 町字と郵便番号の対応
+description: |
+  アドレス・ベース・レジストリの町字と、日本郵便の郵便番号の対応。1 行が町字と郵便番号の 1 組。
+  町字マスタに郵便番号があればそれを使い、無ければ同じ市区町村の中で郵便番号の町域と名前で突き合わせた。
+  町域が丁目や番地で分かれている所では、1 つの町字に郵便番号が複数当たる。ビルの階ごとの郵便番号は入れない。
+  「アドレス・ベース・レジストリ」（デジタル庁）（https://dataset.address-br.digital.go.jp/）と
+  「郵便番号データ」（日本郵便）（https://www.post.japanpost.jp/zipcode/download.html）を加工して作成。
+keywords:
+  - 町字
+  - 郵便番号
+  - 対応表
+sources:
+  - path: https://dataset.address-br.digital.go.jp/
+  - path: https://www.post.japanpost.jp/zipcode/download.html
+fields:
+  - name: lg_code
+    title: 全国地方公共団体コード
+    description: "6桁（検査数字あり）"
+    annotations: { queria: { semantic: { role: entity, name: city } } }
+  - name: machiaza_id
+    title: 町字ID
+    description: "7桁。lg_code との組で一意"
+    annotations: { queria: { semantic: { role: entity, name: town } } }
+  - name: zipcode
+    title: 郵便番号
+    description: "7桁（ハイフンなし）"
+    annotations: { queria: { semantic: { role: entity, name: postal_code } } }
+  - name: match_type
+    title: 当て方
+    description: "abr（町字マスタの郵便番号）、name（町域の名前が大字・町の名前と同じ）、prefix（町域の名前が大字・町の名前の頭と同じ。最も長いもの）、city（当たる町域が無く、市区町村の「以下に掲載がない場合」の郵便番号）"

@@ -43,3 +43,7 @@ japan_address_code:
           alias: e_stat
           is_ducklake: true
           read_only: true
+        - path: "ducklake:https://data.queria.io/datasets/queria/zipcode/ducklake.duckdb"
+          alias: zipcode
+          is_ducklake: true
+          read_only: true

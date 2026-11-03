@@ -4,15 +4,16 @@
 name: japan_address_code
 title: 住所コード対応表
 description: |-
-  アドレス・ベース・レジストリの町字（lg_code＋machiaza_id）と、国勢調査の小地域（KEY_CODE）などの地域コードの対応表。
-  「アドレス・ベース・レジストリ」（デジタル庁）、「国勢調査 町丁・字等別境界データ」（総務省統計局）、「登記所備付地図データ」（法務省）を加工して作成。
-  元にした Queria のデータセットは address_br・e_stat・moj。
+  アドレス・ベース・レジストリの町字（lg_code＋machiaza_id）と、国勢調査の小地域（KEY_CODE）や郵便番号などの地域コードの対応表。
+  「アドレス・ベース・レジストリ」（デジタル庁）、「国勢調査 町丁・字等別境界データ」（総務省統計局）、「登記所備付地図データ」（法務省）、「郵便番号データ」（日本郵便）を加工して作成。
+  元にした Queria のデータセットは address_br・e_stat・moj・zipcode。
 keywords:
   - 住所
   - 町字
   - 小地域
   - 対応表
   - 地域コード
+  - 郵便番号
 homepage: https://github.com/queria-io/dataset-japan-address-code
 language: ja
 
@@ -22,6 +23,7 @@ licenses:
   - id: JP-MOJ-CHIZU
     url: https://www.moj.go.jp/MINJI/minji05_00494.html
     title: 登記所備付地図データ利用規約（法務省）
+  - JP-JAPANPOST-ZIPCODE
 
 sources:
   - title: アドレス・ベース・レジストリ（デジタル庁）
@@ -30,6 +32,8 @@ sources:
     path: https://www.e-stat.go.jp/gis
   - title: 登記所備付地図データ（法務省）
     path: https://www.moj.go.jp/MINJI/minji05_00494.html
+  - title: 郵便番号データ（日本郵便）
+    path: https://www.post.japanpost.jp/zipcode/download.html
 
 contributors:
   - title: デジタル庁
@@ -40,6 +44,9 @@ contributors:
     roles: [rightsHolder]
   - title: 法務省
     path: https://www.moj.go.jp/
+    roles: [rightsHolder]
+  - title: 日本郵便
+    path: https://www.post.japanpost.jp/
     roles: [rightsHolder]
 
 spatial_coverage: [JP]
@@ -59,7 +66,9 @@ annotations:
         town_small_area は町字と小地域の 1 組が 1 行。町字と小地域は 1 対 1 とは限らないので match_type を見る。
         按分するときは town_share（町字のうちこの小地域に入る割合）と small_area_share（小地域のうちこの町字に入る割合）を使い、
         空の行は割合が出せていない。town_shape は町字の形で、作り方は shape_method。
+        town_postal_code は町字と郵便番号の 1 組が 1 行。1 つの町字に郵便番号が複数当たることがある。
       synonyms: [住所 ID 対応表, 町字 小地域 対応, crosswalk]
       examples:
         - 町字ごとの人口を国勢調査の小地域から出したい
         - 住所の町字を小地域コードに変えたい
+        - 町字の郵便番号を知りたい

@@ -10,7 +10,7 @@ import os
 import duckdb
 
 DATASET = "japan_address_code"
-UPSTREAM = ("address_br", "moj")
+UPSTREAM = ("address_br", "moj", "zipcode")
 
 
 def latest(c: duckdb.DuckDBPyConnection, name: str):

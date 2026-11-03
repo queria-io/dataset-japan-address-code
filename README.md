@@ -4,13 +4,14 @@
 
 ## データ出典
 
-Queria の公開データセット address_br・e_stat・moj を読んで作ります。取得はしません。
+Queria の公開データセット address_br・e_stat・moj・zipcode を読んで作ります。取得はしません。
 
 | 原典 | 使う表 |
 | --- | --- |
 | [アドレス・ベース・レジストリ](https://dataset.address-br.digital.go.jp/)（デジタル庁） | `address_br.main.mart_town`、`address_br.main.mart_rsdtdsp_blk` |
 | [国勢調査 町丁・字等別境界データ](https://www.e-stat.go.jp/gis)（総務省統計局、令和2年） | `e_stat.boundary.small_area` |
 | [登記所備付地図データ](https://www.moj.go.jp/MINJI/minji05_00494.html)（法務省） | `moj.chizu.parcel` |
+| [郵便番号データ](https://www.post.japanpost.jp/zipcode/download.html)（日本郵便） | `zipcode.main.mart_zipcode` |
 
 ## 収録テーブル
 
@@ -20,12 +21,14 @@ Queria の公開データセット address_br・e_stat・moj を読んで作り�
 | `main.aza_shape` | 1 行が法務省の地図の 1 つの大字・丁目・小字。筆の形を合わせた形 |
 | `main.town_shape` | 1 行が 1 町字の形。作り方は `shape_method` |
 | `main.small_area_mesh` | 1 行が小地域と 3 次メッシュ（約 1km）の 1 組。重なりの面積と、それぞれに占める割合 |
+| `main.town_postal_code` | 1 行が町字と郵便番号の 1 組。当て方は `match_type` |
 | `main.town_mesh` | 1 行が町字と 3 次メッシュの 1 組。重なりの面積と、それぞれに占める割合。大字・町の形を借りた小字は入れない |
 
 - 町字は `lg_code`（6 桁）と `machiaza_id`（7 桁）の組で一意です。`machiaza_id` だけで結合しないでください
 - 名前は同じ市区町村の中で突き合わせます。ABR の「１丁目」と小地域の「一丁目」のような数字の書き方はそろえます
 - 名前で当たらない町字は、町字の代表点が入る小地域に当てます。代表点の無い小字は大字・町の代表点を使います
 - 町字の形は、小地域に町字が 1 つならその小地域の形、複数なら町字の代表点（住居表示の町字は街区の代表点）のボロノイ図で小地域を切り分けた形です。形の無い小字には大字・町の形を当てます
+- 郵便番号は、町字マスタにあればそれを、無ければ同じ市区町村の中で郵便番号の町域と名前で突き合わせます。大字・字の有無、数字の書き方、ケ・ヶはそろえます。当たらない町字は、市区町村の「以下に掲載がない場合」の郵便番号にします
 - 法務省の地図の筆の形がある町字は、筆を合わせた形を使います。筆で覆えない所（形の無い筆や登記の無い道路など）だけ、上の小地域から作った形を残します（`shape_method` が `parcel`、筆の分の割合は `parcel_share`）。筆とは大字・丁目・小字の名前で突き合わせます
 
 ```sql
@@ -41,7 +44,7 @@ WHERE t.match_type = 'one_to_one'
 
 全国のビルドは GitHub のランナーのメモリに収まらないので、メモリの多い手元の Mac で流します。
 毎月 address_br の更新の翌日に `Check upstream` のワークフローが元のデータセットを確かめ、
-address_br か moj が新しくなっていれば Discord に知らせます。知らせが来たら次を流します。
+address_br・moj・zipcode のどれかが新しくなっていれば Discord に知らせます。知らせが来たら次を流します。
 
 ```bash
 uv sync
