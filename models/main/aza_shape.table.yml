@@ -32,5 +32,5 @@ fields:
     title: 形
     description: 筆の形を合わせた形（経緯度 JGD2011）
   - name: moj_version
-    title: 元にした moj のバージョン
-    description: 合わせたときの moj のバージョン
+    title: 元にした登記所備付地図のデータ
+    description: 合わせたときの geospatial.chizu のデータの目印（chizu のデータファイルの組の md5）

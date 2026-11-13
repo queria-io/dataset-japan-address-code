@@ -1,19 +1,20 @@
 """法務省の地図の筆の形を、大字・丁目・小字ごとに合わせて Parquet にする。
 
 筆は全国 2.45 億あり、dbt の 1 つの集約で合わせるとメモリに乗らないので、公開済みの
-moj.chizu.parcel を市区町村ごとに読んで合わせる。形の無い筆（任意座標系）と、図面の外の
+geospatial.chizu.parcel を市区町村ごとに読んで合わせる。形の無い筆（任意座標系）と、図面の外の
 土地を指す筆（地番に「地区外」「別図」）は使わない。コードは登記所ごとに振られていることが
 あるので、名前の組でまとめる。
 
 全国を合わせるには数時間かかる。法務省の地図は年 1 回しか変わらないので、前回公開した
-main.aza_shape が今の moj と同じバージョンから作ったものなら、それを使い回す。
+main.aza_shape が今の chizu と同じデータから作ったものなら、それを使い回す。
+geospatial はほかのスキーマ（links など）の更新でもバージョンが進むので、chizu のテーブルの
+データファイルの組で見る。
 
 出力: data/aza/*.parquet（models/main/aza_shape.sql が読む）
 """
 
 import logging
 import os
-from datetime import datetime, timezone
 from multiprocessing import Pool
 from pathlib import Path
 
@@ -22,7 +23,7 @@ import duckdb
 logger = logging.getLogger("pipelines")
 
 AZA_DIR = Path("data/aza")
-MOJ = "ducklake:https://data.queria.io/datasets/queria/moj/ducklake.duckdb"
+GEOSPATIAL = "ducklake:https://data.queria.io/datasets/queria/geospatial/ducklake.duckdb"
 PREVIOUS = "ducklake:https://data.queria.io/datasets/queria/japan_address_code/ducklake.duckdb"
 
 SQL = """
@@ -32,7 +33,7 @@ COPY (
         count(*) AS parcels,
         ST_AsWKB(ST_CollectionExtract(ST_MakeValid(ST_Union_Agg(geometry)), 3)) AS geometry,
         '{moj_version}' AS moj_version
-    FROM moj.chizu.parcel
+    FROM geospatial.chizu.parcel
     WHERE lg_code = '{lg_code}'
         AND geometry IS NOT NULL
         AND oaza IS NOT NULL
@@ -50,7 +51,7 @@ moj_version = ""
 def connect() -> duckdb.DuckDBPyConnection:
     c = duckdb.connect(config={"custom_user_agent": os.environ.get("QUERIA_USER_AGENT", "")})
     c.execute("INSTALL spatial; LOAD spatial; INSTALL ducklake; INSTALL httpfs; SET threads = 1; SET enable_progress_bar = false")
-    c.execute(f"ATTACH '{MOJ}' AS moj (READ_ONLY)")
+    c.execute(f"ATTACH '{GEOSPATIAL}' AS geospatial (READ_ONLY)")
     return c
 
 
@@ -73,30 +74,33 @@ def union_city(lg_code: str) -> str:
     return lg_code
 
 
+# chizu の今のデータの目印。データファイルの名前は書くたびに新しくなるので、
+# 今のデータファイルの組が同じなら同じデータを指す
+CHIZU_VERSION = """
+SELECT 'chizu:' || md5(string_agg(f.path, ',' ORDER BY f.path))
+FROM __ducklake_metadata_geospatial.ducklake_data_file AS f
+JOIN __ducklake_metadata_geospatial.ducklake_table AS t USING (table_id)
+JOIN __ducklake_metadata_geospatial.ducklake_schema AS s USING (schema_id)
+WHERE s.schema_name = 'chizu'
+    AND s.end_snapshot IS NULL AND t.end_snapshot IS NULL AND f.end_snapshot IS NULL
+"""
+
+
 def current_version(c: duckdb.DuckDBPyConnection) -> str:
-    """moj の今のバージョンの目印（最後のスナップショットの番号と時刻）。"""
-    snapshot_id, time = c.execute(
-        "SELECT snapshot_id, snapshot_time FROM ducklake_snapshots('moj') ORDER BY snapshot_id DESC LIMIT 1"
-    ).fetchone()
-    return f"{snapshot_id}@{time.astimezone(timezone.utc).isoformat()}"
-
-
-def same_version(a: str, b: str) -> bool:
-    """目印が同じスナップショットを指すか。時刻は書いた手元の時間帯によらず瞬間で比べる。"""
-    (id_a, time_a), (id_b, time_b) = (v.split("@", 1) for v in (a, b))
-    return id_a == id_b and datetime.fromisoformat(time_a) == datetime.fromisoformat(time_b)
+    """geospatial.chizu の今のデータの目印。"""
+    return c.execute(CHIZU_VERSION).fetchone()[0]
 
 
 def reuse_previous(c: duckdb.DuckDBPyConnection, version: str) -> bool:
-    """前回の aza_shape が同じ moj から作ったものなら data/aza に書き出す。"""
+    """前回の aza_shape が同じ chizu から作ったものなら data/aza に書き出す。"""
     try:
         c.execute(f"ATTACH '{PREVIOUS}' AS previous (READ_ONLY)")
         versions = c.execute("SELECT DISTINCT moj_version FROM previous.main.aza_shape").fetchall()
     except duckdb.Error as e:
         logger.info("  前回の aza_shape を読めない: %s", e)
         return False
-    if len(versions) != 1 or not same_version(versions[0][0], version):
-        logger.info("  前回の aza_shape は別の moj から作ったもの: %s", versions)
+    if versions != [(version,)]:
+        logger.info("  前回の aza_shape は別の chizu から作ったもの: %s", versions)
         return False
     for old in AZA_DIR.glob("*.parquet*"):
         old.unlink()
@@ -108,12 +112,12 @@ def reuse_previous(c: duckdb.DuckDBPyConnection, version: str) -> bool:
 
 
 def union_all() -> None:
-    """途中で止まったら、同じ moj のバージョンで済んだ市区町村は合わせ直さない。"""
+    """途中で止まったら、同じ chizu のデータで済んだ市区町村は合わせ直さない。"""
     AZA_DIR.mkdir(parents=True, exist_ok=True)
     marker = AZA_DIR / "moj_version"
     with connect() as c:
         version = current_version(c)
-        logger.info("  moj のバージョン %s", version)
+        logger.info("  chizu のデータ %s", version)
         if not marker.exists() or marker.read_text() != version:
             for old in AZA_DIR.glob("*.parquet*"):
                 old.unlink()
@@ -121,7 +125,7 @@ def union_all() -> None:
         if reuse_previous(c, version):
             logger.info("  前回の aza_shape を使い回す")
             return
-        cities = [r[0] for r in c.execute("SELECT DISTINCT lg_code FROM moj.chizu.source ORDER BY 1").fetchall()]
+        cities = [r[0] for r in c.execute("SELECT DISTINCT lg_code FROM geospatial.chizu.source ORDER BY 1").fetchall()]
     logger.info("  %d 市区町村を合わせる", len(cities))
     for part in AZA_DIR.glob("*.part"):
         part.unlink()
