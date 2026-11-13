@@ -4,13 +4,13 @@
 
 ## 出典と利用条件
 
-Queria の公開データセット address_br・e_stat・moj・zipcode を読んで作ります。
+Queria の公開データセット address_br・e_stat・geospatial・zipcode を読んで作ります。
 
 | 原典 | 使うテーブル |
 | --- | --- |
 | [アドレス・ベース・レジストリ](https://dataset.address-br.digital.go.jp/)（デジタル庁） | `address_br.main.mart_town`、`address_br.main.mart_rsdtdsp_blk` |
 | [国勢調査 町丁・字等別境界データ](https://www.e-stat.go.jp/gis)（総務省統計局、令和2年） | `e_stat.boundary.small_area` |
-| [登記所備付地図データ](https://www.moj.go.jp/MINJI/minji05_00494.html)（法務省） | `moj.chizu.parcel` |
+| [登記所備付地図データ](https://www.moj.go.jp/MINJI/minji05_00494.html)（法務省） | `geospatial.chizu.parcel` |
 | [郵便番号データ](https://www.post.japanpost.jp/zipcode/download.html)（日本郵便） | `zipcode.main.mart_zipcode` |
 
 - 各原典の利用規約に従います。使うときは原典の出典と、Queria が加工したものであることを明記してください
@@ -77,14 +77,14 @@ WHERE t.match_type = 'one_to_one'
 
 ## ビルド
 
-全国のビルドは GitHub のランナーのメモリに収まらないため、メモリの多い手元の Mac で実行します。毎月 address_br の更新の翌日に `Check upstream` のワークフローが元のデータセットを確認し、address_br・moj・zipcode のどれかが新しくなっていれば Discord に通知します。通知が来たら次を実行します。
+全国のビルドは GitHub のランナーのメモリに収まらないため、メモリの多い手元の Mac で実行します。毎月 address_br の更新の翌日に `Check upstream` のワークフローが元のデータセットを確認し、address_br・geospatial の chizu・zipcode のどれかが新しくなっていれば Discord に通知します。通知が来たら次を実行します。
 
 ```bash
 uv sync
 FDL_TOKEN=... scripts/build.sh
 ```
 
-法務省の地図の字の形（`aza_shape`）は、moj が変わっていなければ公開中のものを使い回します。
+法務省の地図の字の形（`aza_shape`）は、geospatial の chizu のデータファイルが変わっていなければ公開中のものを使い回します。
 
 ### 郵便番号の当て方のテストとベンチマーク
 
