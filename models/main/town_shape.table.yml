@@ -26,7 +26,7 @@ fields:
     description: "e_stat の small_area と同じ測地系"
   - name: shape_method
     title: 作り方
-    description: "parcel・small_area・voronoi・parent_oaza（README を参照）"
+    description: "parcel・small_area・voronoi・parent_oaza（データセットの説明を参照）"
   - name: parcel_share
     title: 筆の形の割合
     description: "形の面積のうち筆を合わせた形の割合（0〜1）"
