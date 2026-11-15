@@ -7,7 +7,7 @@
 WITH truth AS (
     -- 町字マスタの郵便番号は ; で複数並ぶことがある。どれかが当たれば正解
     SELECT DISTINCT lg_code, machiaza_id, replace(trim(unnest(string_split(post_code, ';'))), '-', '') AS zipcode
-    FROM address_br.main.mart_town
+    FROM {{ ref('stg_address_br_town') }}
     WHERE post_code IS NOT NULL
 ),
 judged AS (

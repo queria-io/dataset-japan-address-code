@@ -10,7 +10,7 @@ main.aza_shape が今の chizu と同じデータから作ったものなら、�
 geospatial はほかのスキーマ（links など）の更新でもバージョンが進むので、chizu のテーブルの
 データファイルの組で見る。
 
-出力: data/aza/*.parquet（models/main/aza_shape.sql が読む）
+出力: data/aza/*.parquet（models/main/raw/raw_aza_shape.sql が読む）
 """
 
 import logging

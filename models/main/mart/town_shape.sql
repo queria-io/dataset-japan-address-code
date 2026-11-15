@@ -18,12 +18,12 @@ WITH town AS (
         bool_or(koaza IS NOT NULL) AS is_koaza,
         bool_or(rsdt_addr_flg = '1') AS is_rsdt,
         any_value(geometry) FILTER (WHERE geometry IS NOT NULL) AS point
-    FROM address_br.main.mart_town
+    FROM {{ ref('stg_address_br_town') }}
     GROUP BY lg_code, machiaza_id
 ),
 small_area AS (
     SELECT CAST(key_code AS VARCHAR) AS key_code, geometry
-    FROM e_stat.boundary.small_area
+    FROM {{ ref('stg_e_stat_small_area') }}
 ),
 pair AS (
     SELECT p.lg_code, p.machiaza_id, p.key_code, t.is_koaza AND p.method = 'point' AS folds
@@ -65,7 +65,7 @@ block_point AS (
     SELECT m.owner_lg, m.owner_id, m.key_code, b.geometry AS point
     FROM shared m
     JOIN town t USING (lg_code, machiaza_id)
-    JOIN address_br.main.mart_rsdtdsp_blk b USING (lg_code, machiaza_id)
+    JOIN {{ ref('stg_address_br_rsdtdsp_blk') }} b USING (lg_code, machiaza_id)
     WHERE t.is_rsdt AND b.geometry IS NOT NULL AND ST_Contains(m.area, b.geometry)
 ),
 -- 小地域の中に街区の点が無い町字は、町字の代表点を使う
@@ -143,7 +143,7 @@ own AS (
 -- 小字の無い町字に当てる。当てる先が 2 つ以上ある字は使わない。丁目は数字だけで比べる
 town_name AS (
     SELECT DISTINCT lg_code, machiaza_id, oaza_cho AS oaza, coalesce(chome_number, '') AS chome, coalesce(koaza, '') AS koaza
-    FROM address_br.main.mart_town
+    FROM {{ ref('stg_address_br_town') }}
 ),
 aza AS (
     SELECT
