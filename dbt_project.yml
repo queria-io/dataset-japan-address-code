@@ -15,3 +15,6 @@ models:
     +database: japan_address_code
     main:
       +materialized: table
+      # 他のデータセットの表を読む層。テーブルにせず、mart の SQL に埋め込む
+      stg:
+        +materialized: ephemeral

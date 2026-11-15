@@ -5,6 +5,8 @@
 e_stat の小地域の形は国勢調査ごと（5 年に 1 回）にしか変わらないので見ない。
 geospatial はほかのスキーマの更新でもバージョンが進むので、chizu のデータの目印を、公開中の
 aza_shape が元にした目印（moj_version 列）と比べる（pipelines/aza.py と同じ目印）。
+reinfolib と mhlw はほかの表の更新でもバージョンが進むので、読む表の中身を公開中の表と比べる。
+取引の地区が trade_district_small_area に無いとき、管轄一覧表の項目が hellowork_city の元と変わったときに出す。
 """
 
 import os
@@ -22,6 +24,27 @@ WHERE s.schema_name = 'chizu'
     AND s.end_snapshot IS NULL AND t.end_snapshot IS NULL AND f.end_snapshot IS NULL
 """
 
+# 取引の地区は当たらなくても 1 行になるので、行の無い地区は新しい地区
+NEW_TRADE_DISTRICTS = f"""
+SELECT count(*) FROM (
+    SELECT DISTINCT municipality_code, district_name
+    FROM reinfolib.main.mart_trade_prices
+    WHERE coalesce(district_name, '') NOT IN ('', '（大字なし）')
+    EXCEPT
+    SELECT municipality_code, district_name FROM {DATASET}.main.trade_district_small_area
+)
+"""
+# 当てた項目が管轄一覧表から消えるか変わると、項目の順（item_order）もずれる
+CHANGED_JURISDICTION = f"""
+SELECT count(*) FROM (
+    SELECT prefecture_code, office_name, office_kind, item_order, area_text
+    FROM {DATASET}.main.hellowork_city
+    EXCEPT
+    SELECT prefecture_code, office_name, office_kind, item_order, area_text
+    FROM mhlw.hellowork.jurisdiction_area
+)
+"""
+
 
 def latest(c: duckdb.DuckDBPyConnection, name: str):
     c.execute(f"ATTACH 'ducklake:https://data.queria.io/datasets/queria/{name}/metadata.db' AS {name} (READ_ONLY)")
@@ -37,6 +60,12 @@ def main() -> None:
     built_from = c.execute(f"SELECT DISTINCT moj_version FROM {DATASET}.main.aza_shape").fetchall()
     if built_from != [c.execute(CHIZU_VERSION).fetchone()]:
         stale.append("geospatial")
+    latest(c, "reinfolib")
+    if c.execute(NEW_TRADE_DISTRICTS).fetchone()[0]:
+        stale.append("reinfolib")
+    latest(c, "mhlw")
+    if c.execute(CHANGED_JURISDICTION).fetchone()[0]:
+        stale.append("mhlw")
     print("\n".join(stale))
 
 

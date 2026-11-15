@@ -47,3 +47,11 @@ japan_address_code:
           alias: zipcode
           is_ducklake: true
           read_only: true
+        - path: "ducklake:https://data.queria.io/datasets/queria/reinfolib/metadata.db"
+          alias: reinfolib
+          is_ducklake: true
+          read_only: true
+        - path: "ducklake:https://data.queria.io/datasets/queria/mhlw/metadata.db"
+          alias: mhlw
+          is_ducklake: true
+          read_only: true

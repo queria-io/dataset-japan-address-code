@@ -4,7 +4,7 @@ Queria のデータセット `japan_address_code`（住所コード対応表）�
 
 ## ビルド
 
-全国のビルドは GitHub のランナーのメモリに収まらないため、メモリの多い手元の Mac で実行します。毎月 address_br の更新の翌日に `Check upstream` のワークフローが元のデータセットを確認し、address_br・geospatial の chizu・zipcode のどれかが新しくなっていれば Discord に通知します。通知が来たら次を実行します。
+全国のビルドは GitHub のランナーのメモリに収まらないため、メモリの多い手元の Mac で実行します。毎月 address_br の更新の翌日に `Check upstream` のワークフローが元のデータセットを確認し、address_br・geospatial の chizu・zipcode のどれかが新しくなったとき、reinfolib に新しい取引の地区が出たとき、mhlw の管轄一覧表が変わったときに Discord に通知します。通知が来たら次を実行します。
 
 ```bash
 uv sync
