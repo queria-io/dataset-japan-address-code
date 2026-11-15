@@ -1,6 +1,6 @@
 -- 郵便番号の無い町字と、市区町村全体の郵便番号 (city) に落ちる町字が 5% を超えたら落とす
 WITH town AS (
-    SELECT DISTINCT lg_code, machiaza_id FROM {{ ref('stg_address_br_town') }}
+    SELECT DISTINCT lg_code, machiaza_id FROM {{ ref('stg_address_br__town') }}
 ),
 p AS (
     SELECT lg_code, machiaza_id, bool_and(match_type = 'city') AS city

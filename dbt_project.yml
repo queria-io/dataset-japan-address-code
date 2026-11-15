@@ -15,7 +15,7 @@ models:
     +database: japan_address_code
     main:
       +materialized: table
-      # raw は大きな形の Parquet を、stg は raw と他のデータセットの表を読むだけなので、テーブルにもビューにもせず mart の中で展開する
+      # raw は大きな形の Parquet を、stg は raw と他のデータセットの表を読むだけなので、テーブルにもビューにもせず mart の SQL に展開する
       raw:
         +materialized: ephemeral
       stg:

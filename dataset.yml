@@ -4,9 +4,9 @@
 name: japan_address_code
 title: 住所コード対応表
 description: |-
-  アドレス・ベース・レジストリの町字（lg_code と machiaza_id）と、国勢調査の小地域・郵便番号・3 次メッシュの対応表です。町字の形も収録しています。
+  アドレス・ベース・レジストリの町字（lg_code と machiaza_id）と、国勢調査の小地域・郵便番号・3 次メッシュの対応表です。町字の形と、不動産取引の地区・ハローワークの管轄区域を地域コードに当てた対応表も収録しています。
 
-  出典：「アドレス・ベース・レジストリ」（デジタル庁）、「国勢調査 町丁・字等別境界データ」（総務省統計局）、「登記所備付地図データ」（法務省）、「郵便番号データ」（日本郵便）。Queria が加工したものです。
+  出典：「アドレス・ベース・レジストリ」（デジタル庁）、「国勢調査 町丁・字等別境界データ」（総務省統計局）、「登記所備付地図データ」（法務省）、「郵便番号データ」（日本郵便）、「不動産情報ライブラリ」（国土交通省）、「都道府県労働局所在地一覧」（厚生労働省）。Queria が加工したものです。
 keywords:
   - 住所
   - 町字
@@ -14,6 +14,8 @@ keywords:
   - 対応表
   - 地域コード
   - 郵便番号
+  - 不動産取引
+  - ハローワーク
 homepage: https://github.com/queria-io/dataset-japan-address-code
 language: ja
 
@@ -34,6 +36,10 @@ sources:
     path: https://www.moj.go.jp/MINJI/minji05_00494.html
   - title: 郵便番号データ（日本郵便）
     path: https://www.post.japanpost.jp/zipcode/download.html
+  - title: 不動産情報ライブラリ（国土交通省）
+    path: https://www.reinfolib.mlit.go.jp/
+  - title: 都道府県労働局（労働基準監督署、公共職業安定所）所在地一覧（厚生労働省）
+    path: https://www.mhlw.go.jp/kouseiroudoushou/shozaiannai/roudoukyoku/index.html
 
 contributors:
   - title: デジタル庁
@@ -47,6 +53,12 @@ contributors:
     roles: [rightsHolder]
   - title: 日本郵便
     path: https://www.post.japanpost.jp/
+    roles: [rightsHolder]
+  - title: 国土交通省
+    path: https://www.mlit.go.jp/
+    roles: [rightsHolder]
+  - title: 厚生労働省
+    path: https://www.mhlw.go.jp/
     roles: [rightsHolder]
 
 spatial_coverage: [JP]
@@ -67,8 +79,16 @@ annotations:
         按分するときは town_share（町字のうちこの小地域に入る割合）と small_area_share（小地域のうちこの町字に入る割合）を使い、
         空の行は割合が出せていない。town_shape は町字の形で、作り方は shape_method。
         town_postal_code は町字と郵便番号の 1 組が 1 行。1 つの町字に郵便番号が複数当たることがある。
-      synonyms: [住所 ID 対応表, 町字 小地域 対応, crosswalk]
+        trade_district_small_area は不動産取引の地区（大字・町）と小地域の 1 組が 1 行。reinfolib の mart_trade_prices と
+        municipality_code・district_name で結合すると、取引ごとに小地域コードが付く。1 つの地区は大字・町にかかる小地域すべてと組になる
+        （取引がその中のどこかは判定できない）。oaza_count が 1 でない地区は大字・町が決まっていない。
+        hellowork_city は市区町村ごとの管轄ハローワークで、1 行が市区町村×安定所。lg_code は 6 桁で、政令指定都市は区のコード。
+        coverage = 'partial' は市区町村の一部だけを受け持つ行。安定所の所在地は mhlw.hellowork.office と
+        prefecture_code・office_name・office_kind で結合する。
+      synonyms: [住所 ID 対応表, 町字 小地域 対応, crosswalk, 取引 地区 小地域, 管轄ハローワーク, 公共職業安定所 管轄]
       examples:
         - 町字ごとの人口を国勢調査の小地域から出したい
         - 住所の町字を小地域コードに変えたい
         - 町字の郵便番号を知りたい
+        - 不動産取引に小地域コードを付けたい
+        - 市区町村を受け持つハローワークを知りたい

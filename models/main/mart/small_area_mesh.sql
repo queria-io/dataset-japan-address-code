@@ -3,7 +3,7 @@
 -- メッシュは緯度 30 秒 × 経度 45 秒。小地域の外接矩形にかかるメッシュを作って形と重ねる
 WITH small_area AS (
     SELECT CAST(key_code AS VARCHAR) AS key_code, geometry
-    FROM {{ ref('stg_e_stat_small_area') }}
+    FROM {{ ref('stg_e_stat__small_area') }}
 ),
 cell AS (
     SELECT s.key_code, s.geometry, r.y, c.x

@@ -4,7 +4,7 @@
 -- 大字・町の無い小字だけの町字 (松本市の「芳川平田」など) は小字の名前で突き合わせる
 WITH town AS (
     SELECT lg_code, machiaza_id, any_value(coalesce(oaza_cho, koaza)) AS oaza_cho
-    FROM {{ ref('stg_address_br_town') }}
+    FROM {{ ref('stg_address_br__town') }}
     GROUP BY lg_code, machiaza_id
 ),
 named AS (
@@ -13,7 +13,7 @@ named AS (
 ),
 zip AS (
     SELECT DISTINCT lg_code, zipcode, {{ town_name_normalize("regexp_replace(town, '（.*$', '')") }} AS name
-    FROM {{ ref('stg_zipcode') }}
+    FROM {{ ref('stg_zipcode__zipcode') }}
     -- 「以下に掲載がない場合」「中津市の次に番地がくる場合」は市区町村全体の郵便番号なので名前の突き合わせに使わない
     WHERE town <> '以下に掲載がない場合' AND NOT ends_with(town, '次に番地がくる場合')
         AND NOT regexp_matches(town, '（.*階.*）$')
