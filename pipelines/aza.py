@@ -23,8 +23,8 @@ import duckdb
 logger = logging.getLogger("pipelines")
 
 AZA_DIR = Path("data/aza")
-GEOSPATIAL = "ducklake:https://data.queria.io/datasets/queria/geospatial/ducklake.duckdb"
-PREVIOUS = "ducklake:https://data.queria.io/datasets/queria/japan_address_code/ducklake.duckdb"
+GEOSPATIAL = "ducklake:https://data.queria.io/datasets/queria/geospatial/metadata.db"
+PREVIOUS = "ducklake:https://data.queria.io/datasets/queria/japan_address_code/metadata.db"
 
 SQL = """
 COPY (

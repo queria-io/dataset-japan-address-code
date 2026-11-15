@@ -24,7 +24,7 @@ WHERE s.schema_name = 'chizu'
 
 
 def latest(c: duckdb.DuckDBPyConnection, name: str):
-    c.execute(f"ATTACH 'ducklake:https://data.queria.io/datasets/queria/{name}/ducklake.duckdb' AS {name} (READ_ONLY)")
+    c.execute(f"ATTACH 'ducklake:https://data.queria.io/datasets/queria/{name}/metadata.db' AS {name} (READ_ONLY)")
     return c.execute(f"SELECT epoch_us(max(snapshot_time)) FROM ducklake_snapshots('{name}')").fetchone()[0]
 
 
