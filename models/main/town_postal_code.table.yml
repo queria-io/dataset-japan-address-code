@@ -28,4 +28,4 @@ fields:
     annotations: { queria: { semantic: { role: entity, name: postal_code } } }
   - name: match_type
     title: 当て方
-    description: "abr・name・prefix・sub・city（README を参照）"
+    description: "abr・name・prefix・sub・city（データセットの説明を参照）"
