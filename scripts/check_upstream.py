@@ -46,6 +46,15 @@ SELECT count(*) FROM (
 """
 
 
+def changed(c: duckdb.DuckDBPyConnection, sql: str) -> bool:
+    # 公開中のデータセットに比べる表がまだ無いときも作り直しが要る。例外で止めると、
+    # 先に見つけた address_br などの名前も出せないまま終わる
+    try:
+        return bool(c.execute(sql).fetchone()[0])
+    except duckdb.CatalogException:
+        return True
+
+
 def latest(c: duckdb.DuckDBPyConnection, name: str):
     c.execute(f"ATTACH 'ducklake:https://data.queria.io/datasets/queria/{name}/metadata.db' AS {name} (READ_ONLY)")
     return c.execute(f"SELECT epoch_us(max(snapshot_time)) FROM ducklake_snapshots('{name}')").fetchone()[0]
@@ -61,10 +70,10 @@ def main() -> None:
     if built_from != [c.execute(CHIZU_VERSION).fetchone()]:
         stale.append("geospatial")
     latest(c, "reinfolib")
-    if c.execute(NEW_TRADE_DISTRICTS).fetchone()[0]:
+    if changed(c, NEW_TRADE_DISTRICTS):
         stale.append("reinfolib")
     latest(c, "mhlw")
-    if c.execute(CHANGED_JURISDICTION).fetchone()[0]:
+    if changed(c, CHANGED_JURISDICTION):
         stale.append("mhlw")
     print("\n".join(stale))
 
