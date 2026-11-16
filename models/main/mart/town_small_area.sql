@@ -8,7 +8,7 @@ WITH town AS (
         any_value(efct_date) AS efct_date,
         any_value({{ kanji_number("oaza_cho || coalesce(chome, '') || coalesce(koaza, '')") }}) AS name,
         any_value(geometry) AS geometry
-    FROM address_br.main.mart_town
+    FROM {{ ref('stg_address_br__town') }}
     GROUP BY lg_code, machiaza_id
 ),
 -- 代表点の無い小字は、同じ大字・町 (町字 ID の末尾 000) の代表点を使う
@@ -26,7 +26,7 @@ small_area AS (
         prefecture_code || city_code AS city_code,
         area_name AS name,
         geometry
-    FROM e_stat.boundary.small_area
+    FROM {{ ref('stg_e_stat__small_area') }}
 ),
 by_name AS (
     SELECT t.lg_code, t.machiaza_id, s.key_code, 'name' AS method,

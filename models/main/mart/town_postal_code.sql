@@ -9,12 +9,12 @@
 -- 名前の突き合わせは town_postal_code_match。名前は「大字」と頭の「字」を外し、全角数字を漢数字に、異体字 (曾・峯・澤・瀧・驒 など) と「の」を片方にそろえる。
 -- 町域の括弧書き (丁目・番地の範囲) は名前から外して比べる。ビルの階ごとの郵便番号は使わない
 WITH town AS (
-    SELECT DISTINCT lg_code, machiaza_id FROM address_br.main.mart_town
+    SELECT DISTINCT lg_code, machiaza_id FROM {{ ref('stg_address_br__town') }}
 ),
 -- 町字マスタの郵便番号は「6008049;6008050」のように ; で複数並ぶことがある
 abr AS (
     SELECT DISTINCT lg_code, machiaza_id, replace(trim(unnest(string_split(post_code, ';'))), '-', '') AS zipcode
-    FROM address_br.main.mart_town
+    FROM {{ ref('stg_address_br__town') }}
     WHERE post_code IS NOT NULL
 ),
 city AS (
@@ -22,7 +22,7 @@ city AS (
         any_value(zipcode) FILTER (WHERE town = '以下に掲載がない場合'),
         CASE WHEN count(DISTINCT zipcode) = 1 THEN any_value(zipcode) END
     ) AS zipcode
-    FROM zipcode.main.mart_zipcode
+    FROM {{ ref('stg_zipcode__zipcode') }}
     GROUP BY lg_code
     HAVING zipcode IS NOT NULL
 ),
