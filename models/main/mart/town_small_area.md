@@ -1,5 +1,6 @@
-schema: main
-name: town_small_area
+---
+$schema: https://queria.io/schemas/table/v1.json
+table: main.town_small_area
 title: 町字と小地域の対応
 description: |-
   町字と国勢調査の小地域（令和2年）の対応です。1 行が町字と小地域の 1 組です。
@@ -17,15 +18,15 @@ fields:
   - name: lg_code
     title: 全国地方公共団体コード
     description: "6 桁（検査数字あり）"
-    annotations: { queria: { semantic: { role: entity, name: city } } }
+    semantic: {role: entity, name: city}
   - name: machiaza_id
     title: 町字ID
     description: "7 桁。lg_code との組で一意"
-    annotations: { queria: { semantic: { role: entity, name: town } } }
+    semantic: {role: entity, name: town}
   - name: key_code
     title: 小地域コード
     description: "国勢調査の KEY_CODE。当たる小地域がない町字は空"
-    annotations: { queria: { semantic: { role: entity, name: small_area } } }
+    semantic: {role: entity, name: small_area}
   - name: match_type
     title: 対応の種類
     description: "one_to_one・town_split・towns_merged・many_to_many"
@@ -46,3 +47,4 @@ fields:
     description: "小地域の境界の国勢調査の年"
   - name: valid_from
     title: 町字の効力発生日
+---

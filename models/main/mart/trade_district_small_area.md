@@ -1,5 +1,6 @@
-schema: main
-name: trade_district_small_area
+---
+$schema: https://queria.io/schemas/table/v1.json
+table: main.trade_district_small_area
 title: 不動産取引の地区と町丁目の対応
 description: |-
   不動産取引価格（reinfolib の mart_trade_prices）の地区と、国勢調査の小地域の対応です。1 行が地区と小地域の 1 組です。
@@ -21,14 +22,15 @@ fields:
   - name: lg_code
     title: 全国地方公共団体コード
     description: 6 桁。当てた大字・町の市区町村
-    annotations: { queria: { semantic: { role: entity, name: city } } }
+    semantic: {role: entity, name: city}
   - name: key_code
     title: 小地域コード
     description: e_stat の境界・国勢調査と同じ。当たらない地区は空
-    annotations: { queria: { semantic: { role: entity, name: small_area } } }
+    semantic: {role: entity, name: small_area}
   - name: town_code
     title: 町コード
     description: key_code の先頭 9 桁
   - name: oaza_count
     title: 当たった大字・町の数
     description: 1 なら大字・町が 1 つに決まります。0 は当たらない地区
+---

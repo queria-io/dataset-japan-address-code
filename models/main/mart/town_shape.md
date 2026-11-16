@@ -1,5 +1,6 @@
-schema: main
-name: town_shape
+---
+$schema: https://queria.io/schemas/table/v1.json
+table: main.town_shape
 title: 町字の形
 description: |-
   町字の形です。公式の町字の形はないため、国勢調査の小地域と法務省の地図の筆の形から作っています。
@@ -16,11 +17,11 @@ fields:
   - name: lg_code
     title: 全国地方公共団体コード
     description: "6 桁（検査数字あり）"
-    annotations: { queria: { semantic: { role: entity, name: city } } }
+    semantic: {role: entity, name: city}
   - name: machiaza_id
     title: 町字ID
     description: "7 桁。lg_code との組で一意"
-    annotations: { queria: { semantic: { role: entity, name: town } } }
+    semantic: {role: entity, name: town}
   - name: geometry
     title: 形
     description: "e_stat の small_area と同じ測地系"
@@ -30,3 +31,4 @@ fields:
   - name: parcel_share
     title: 筆の形の割合
     description: "形の面積のうち筆を合わせた形の割合（0〜1）"
+---

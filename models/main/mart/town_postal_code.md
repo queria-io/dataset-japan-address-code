@@ -1,5 +1,6 @@
-schema: main
-name: town_postal_code
+---
+$schema: https://queria.io/schemas/table/v1.json
+table: main.town_postal_code
 title: 町字と郵便番号の対応
 description: |-
   町字と郵便番号の対応です。1 行が町字と郵便番号の 1 組です。
@@ -17,15 +18,16 @@ fields:
   - name: lg_code
     title: 全国地方公共団体コード
     description: "6 桁（検査数字あり）"
-    annotations: { queria: { semantic: { role: entity, name: city } } }
+    semantic: {role: entity, name: city}
   - name: machiaza_id
     title: 町字ID
     description: "7 桁。lg_code との組で一意"
-    annotations: { queria: { semantic: { role: entity, name: town } } }
+    semantic: {role: entity, name: town}
   - name: zipcode
     title: 郵便番号
     description: "7 桁（ハイフンなし）"
-    annotations: { queria: { semantic: { role: entity, name: postal_code } } }
+    semantic: {role: entity, name: postal_code}
   - name: match_type
     title: 当て方
     description: "abr・name・prefix・sub・city（データセットの説明を参照）"
+---

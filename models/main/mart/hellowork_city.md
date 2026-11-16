@@ -1,5 +1,6 @@
-schema: main
-name: hellowork_city
+---
+$schema: https://queria.io/schemas/table/v1.json
+table: main.hellowork_city
 title: 市区町村ごとの管轄ハローワーク
 description: |-
   公共職業安定所（ハローワーク）の管轄区域を市区町村に当てたものです。1 行が市区町村と安定所の 1 組です。
@@ -15,13 +16,13 @@ fields:
   - name: lg_code
     title: 全国地方公共団体コード
     description: 6 桁。政令指定都市は区のコード
-    annotations: { queria: { semantic: { role: entity, name: city } } }
+    semantic: {role: entity, name: city}
   - name: city_code
     title: 市区町村コード
     description: lg_code の先頭 5 桁
   - name: prefecture_code
     title: 都道府県コード
-    annotations: { queria: { semantic: { role: entity, name: prefecture } } }
+    semantic: {role: entity, name: prefecture}
   - name: prefecture_name
     title: 都道府県名
   - name: county_name
@@ -46,3 +47,4 @@ fields:
   - name: area_text
     title: 管轄区域の項目
     description: 当てた管轄一覧表の項目（例 稲敷郡のうち阿見町）
+---
