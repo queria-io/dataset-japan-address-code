@@ -1,5 +1,6 @@
-schema: main
-name: aza_shape
+---
+$schema: https://queria.io/schemas/table/v1.json
+table: main.aza_shape
 title: 法務省の地図の字の形
 description: |-
   登記所備付地図の筆の形を、大字・丁目・小字の名前ごとに合わせた形です。1 行が 1 つの大字・丁目・小字です。
@@ -16,7 +17,7 @@ fields:
   - name: lg_code
     title: 全国地方公共団体コード
     description: "6 桁（検査数字あり）"
-    annotations: { queria: { semantic: { role: entity, name: city } } }
+    semantic: {role: entity, name: city}
   - name: oaza
     title: 大字名
     description: 原典のまま
@@ -34,3 +35,4 @@ fields:
   - name: moj_version
     title: 元にした登記所備付地図のデータ
     description: 合わせたときの geospatial.chizu のデータの目印（chizu のデータファイルの組の md5）
+---

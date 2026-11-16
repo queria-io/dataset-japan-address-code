@@ -1,5 +1,6 @@
-schema: main
-name: town_mesh
+---
+$schema: https://queria.io/schemas/table/v1.json
+table: main.town_mesh
 title: 町字と 3 次メッシュの対応
 description: |-
   町字と 3 次メッシュ（約 1km 四方）の重なりです。1 行が町字とメッシュの 1 組です。
@@ -18,15 +19,15 @@ fields:
   - name: lg_code
     title: 全国地方公共団体コード
     description: "6 桁（検査数字あり）"
-    annotations: { queria: { semantic: { role: entity, name: city } } }
+    semantic: {role: entity, name: city}
   - name: machiaza_id
     title: 町字ID
     description: "7 桁。lg_code との組で一意"
-    annotations: { queria: { semantic: { role: entity, name: town } } }
+    semantic: {role: entity, name: town}
   - name: mesh_code
     title: 3 次メッシュコード
     description: "8 桁"
-    annotations: { queria: { semantic: { role: entity, name: mesh } } }
+    semantic: {role: entity, name: mesh}
   - name: area_m2
     title: 重なりの面積（平方メートル）
     description: "メッシュの中心の緯度で換算した近似値"
@@ -36,3 +37,4 @@ fields:
   - name: mesh_share
     title: メッシュのうちこの町字が占める割合
     description: "0〜1。海などがあるため、合計が 1 にならないことがあります"
+---

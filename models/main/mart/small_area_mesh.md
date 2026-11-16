@@ -1,5 +1,6 @@
-schema: main
-name: small_area_mesh
+---
+$schema: https://queria.io/schemas/table/v1.json
+table: main.small_area_mesh
 title: 小地域と 3 次メッシュの対応
 description: |-
   国勢調査の小地域（令和2年）と 3 次メッシュ（約 1km 四方）の重なりです。1 行が小地域とメッシュの 1 組です。
@@ -16,11 +17,11 @@ fields:
   - name: key_code
     title: 小地域コード
     description: "国勢調査の KEY_CODE（9 桁または 11 桁）"
-    annotations: { queria: { semantic: { role: entity, name: small_area } } }
+    semantic: {role: entity, name: small_area}
   - name: mesh_code
     title: 3 次メッシュコード
     description: "8 桁"
-    annotations: { queria: { semantic: { role: entity, name: mesh } } }
+    semantic: {role: entity, name: mesh}
   - name: area_m2
     title: 重なりの面積（平方メートル）
     description: "メッシュの中心の緯度で換算した近似値"
@@ -30,3 +31,4 @@ fields:
   - name: mesh_share
     title: メッシュのうちこの小地域が占める割合
     description: "0〜1。海などがあるため、合計が 1 にならないことがあります"
+---
