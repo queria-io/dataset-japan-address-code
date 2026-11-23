@@ -15,15 +15,15 @@ columns:
   - name: lg_code
     title: 全国地方公共団体コード
     description: "6 桁（検査数字あり）"
-    entity: {type: foreign, name: city}
+    entity: city
   - name: machiaza_id
     title: 町字ID
     description: "7 桁。lg_code との組で一意"
-    entity: {type: foreign, name: town}
+    entity: town
   - name: mesh_code
     title: 3 次メッシュコード
     description: "8 桁"
-    entity: {type: foreign, name: mesh}
+    entity: mesh
   - name: area_m2
     title: 重なりの面積（平方メートル）
     description: "メッシュの中心の緯度で換算した近似値"

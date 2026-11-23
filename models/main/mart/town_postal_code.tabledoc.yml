@@ -14,15 +14,15 @@ columns:
   - name: lg_code
     title: 全国地方公共団体コード
     description: "6 桁（検査数字あり）"
-    entity: {type: foreign, name: city}
+    entity: city
   - name: machiaza_id
     title: 町字ID
     description: "7 桁。lg_code との組で一意"
-    entity: {type: foreign, name: town}
+    entity: town
   - name: zipcode
     title: 郵便番号
     description: "7 桁（ハイフンなし）"
-    entity: {type: foreign, name: postal_code}
+    entity: postal_code
   - name: match_type
     title: 当て方
     description: "abr・name・prefix・sub・city（データセットの説明を参照）"
