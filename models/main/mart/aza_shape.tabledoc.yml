@@ -1,23 +1,20 @@
----
-$schema: https://queria.io/schemas/table/v1.json
-table: main.aza_shape
+$schema: https://tabledoc.queria.io/schemas/table/v1.json
 title: 法務省の地図の字の形
 description: |-
   登記所備付地図の筆の形を、大字・丁目・小字の名前ごとに合わせた形です。1 行が 1 つの大字・丁目・小字です。
 
   - 形を持つ筆だけを合わせるため、任意座標系の図面が多い地域では形が欠けます
   - 登記のない道路や水路は、穴やすき間として残ります
-keywords:
+topics:
   - 地番
   - 筆
   - 境界
-sources:
-  - path: https://www.moj.go.jp/MINJI/minji05_00494.html
-fields:
+sources: [minji05_00494]
+columns:
   - name: lg_code
     title: 全国地方公共団体コード
     description: "6 桁（検査数字あり）"
-    semantic: {role: entity, name: city}
+    entity: {type: foreign, name: city}
   - name: oaza
     title: 大字名
     description: 原典のまま
@@ -35,4 +32,3 @@ fields:
   - name: moj_version
     title: 元にした登記所備付地図のデータ
     description: 合わせたときの geospatial.chizu のデータの目印（chizu のデータファイルの組の md5）
----

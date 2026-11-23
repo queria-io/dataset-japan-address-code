@@ -1,7 +1,6 @@
 version: 2
 models:
 - name: aza_shape
-  description: 登記所備付地図の筆の形を、市区町村・大字・丁目・小字の名前ごとに合わせた形。
   access: public
   columns:
   - name: lg_code

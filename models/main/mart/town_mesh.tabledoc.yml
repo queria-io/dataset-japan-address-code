@@ -1,33 +1,29 @@
----
-$schema: https://queria.io/schemas/table/v1.json
-table: main.town_mesh
+$schema: https://tabledoc.queria.io/schemas/table/v1.json
 title: 町字と 3 次メッシュの対応
 description: |-
   町字と 3 次メッシュ（約 1km 四方）の重なりです。1 行が町字とメッシュの 1 組です。
 
   - 重なりの面積と、それぞれに占める割合で、集計値を面積で按分できます
   - 大字・町の形を借りた小字は入っていません。同じ大字・町（machiaza_id の末尾 000）の行を使います
-keywords:
+topics:
   - 町字
   - メッシュ
   - 対応表
   - 按分
-sources:
-  - path: https://dataset.address-br.digital.go.jp/
-  - path: https://www.e-stat.go.jp/gis
-fields:
+sources: [dataset, gis]
+columns:
   - name: lg_code
     title: 全国地方公共団体コード
     description: "6 桁（検査数字あり）"
-    semantic: {role: entity, name: city}
+    entity: {type: foreign, name: city}
   - name: machiaza_id
     title: 町字ID
     description: "7 桁。lg_code との組で一意"
-    semantic: {role: entity, name: town}
+    entity: {type: foreign, name: town}
   - name: mesh_code
     title: 3 次メッシュコード
     description: "8 桁"
-    semantic: {role: entity, name: mesh}
+    entity: {type: foreign, name: mesh}
   - name: area_m2
     title: 重なりの面積（平方メートル）
     description: "メッシュの中心の緯度で換算した近似値"
@@ -37,4 +33,3 @@ fields:
   - name: mesh_share
     title: メッシュのうちこの町字が占める割合
     description: "0〜1。海などがあるため、合計が 1 にならないことがあります"
----

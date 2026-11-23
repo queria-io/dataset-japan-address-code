@@ -3,7 +3,6 @@ version: 2
 models:
   - name: hellowork_city
     access: public
-    description: 公共職業安定所（ハローワーク）の管轄区域を市区町村に当てたもの。1 行が市区町村と安定所の 1 組。
     columns:
       - name: lg_code
       - name: city_code
