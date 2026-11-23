@@ -15,14 +15,11 @@ topics:
   - 郵便番号
   - 不動産取引
   - ハローワーク
-homepage: https://github.com/queria-io/dataset-japan-address-code
 language: ja
 licenses:
   - JP-DIGITAL-ADDRESS-BR
   - JP-GOV-STD-2.0
-  - id: JP-MOJ-CHIZU
-    url: https://www.moj.go.jp/MINJI/minji05_00494.html
-    title: 登記所備付地図データ利用規約（法務省）
+  - JP-MOJ-CHIZU
   - JP-JAPANPOST-ZIPCODE
 
 sources:
