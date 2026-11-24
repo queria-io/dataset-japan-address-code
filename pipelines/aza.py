@@ -125,7 +125,7 @@ def union_all() -> None:
         if reuse_previous(c, version):
             logger.info("  前回の aza_shape を使い回す")
             return
-        cities = [r[0] for r in c.execute("SELECT DISTINCT lg_code FROM geospatial.chizu.source ORDER BY 1").fetchall()]
+        cities = [r[0] for r in c.execute("SELECT DISTINCT lg_code FROM geospatial.chizu.source_file ORDER BY 1").fetchall()]
     logger.info("  %d 市区町村を合わせる", len(cities))
     for part in AZA_DIR.glob("*.part"):
         part.unlink()
